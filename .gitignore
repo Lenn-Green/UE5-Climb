@@ -1,0 +1,47 @@
+# Unreal Engine generated files
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+
+# Unreal local/user files
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata/
+*.code-workspace
+
+# Unreal build artifacts
+*.target
+*.modules
+*.version
+*.exp
+*.lib
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.log
+
+# IDE and OS metadata
+.vs/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Optional template content removed from this repository.
+Content/StarterContent/
+
+# Keep project-local Codex skills, ignore transient Codex state if added later.
+.codex/*
+!.codex/skills/
+!.codex/skills/**
