@@ -1,5 +1,6 @@
 #include "Character/ClimbingCharacter.h"
 
+#include "Components/ClimbingHoldQueryComponent.h"
 #include "Components/ClimbingMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -11,6 +12,7 @@ AClimbingCharacter::AClimbingCharacter(const FObjectInitializer& ObjectInitializ
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UClimbingMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
+	HoldQueryComponent = CreateDefaultSubobject<UClimbingHoldQueryComponent>(TEXT("HoldQueryComponent"));
 }
 
 void AClimbingCharacter::BeginPlay()
@@ -70,6 +72,11 @@ bool AClimbingCharacter::IsClimbing() const
 UClimbingMovementComponent* AClimbingCharacter::GetClimbingMovementComponent() const
 {
 	return Cast<UClimbingMovementComponent>(GetCharacterMovement());
+}
+
+UClimbingHoldQueryComponent* AClimbingCharacter::GetHoldQueryComponent() const
+{
+	return HoldQueryComponent;
 }
 
 FVector2D AClimbingCharacter::GetClimbCenterOfMassInput() const

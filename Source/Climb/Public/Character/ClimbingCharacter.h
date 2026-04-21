@@ -7,6 +7,7 @@
 
 struct FInputActionValue;
 class UClimbingMovementComponent;
+class UClimbingHoldQueryComponent;
 class UInputAction;
 class UInputMappingContext;
 
@@ -35,6 +36,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Movement")
 	UClimbingMovementComponent* GetClimbingMovementComponent() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Hold Query")
+	UClimbingHoldQueryComponent* GetHoldQueryComponent() const;
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Input")
 	FVector2D GetClimbCenterOfMassInput() const;
@@ -84,6 +88,9 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
 	float RightGripInput = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Climbing|Components")
+	TObjectPtr<UClimbingHoldQueryComponent> HoldQueryComponent;
 
 private:
 	void AddClimbingInputMappingContext() const;

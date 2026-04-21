@@ -61,7 +61,7 @@ Goal: Add climbing-specific input actions and bindings.
 Deliverables:
 
 - Input Actions:
-  - `IA_ClimbCoMMove`
+  - `IA_ClimbCenterOfMassMove`
   - `IA_ClimbLimbProbe`
   - `IA_ClimbLeftGrip`
   - `IA_ClimbRightGrip`
@@ -69,11 +69,11 @@ Deliverables:
   - `IMC_Climbing`
 - C++ binding through `UEnhancedInputComponent`.
 - Mapping context setup through `UEnhancedInputLocalPlayerSubsystem`.
-- Stored input fields for CoM vector, limb probe vector, left grip value, and right grip value.
+- Stored input fields for center-of-mass vector, limb probe vector, left grip value, and right grip value.
 
 Acceptance:
 
-- Left stick drives CoM input data.
+- Left stick drives center-of-mass input data.
 - Right stick drives limb probe input data.
 - L2 and R2 remain side-specific.
 - No legacy input is used for core climbing controls.
@@ -81,7 +81,7 @@ Acceptance:
 Test checklist:
 
 - Build `ClimbEditor Win64 Development`.
-- Open the editor and inspect `IA_ClimbCoMMove`, `IA_ClimbLimbProbe`, `IA_ClimbLeftGrip`, `IA_ClimbRightGrip`, and `IMC_Climbing`.
+- Open the editor and inspect `IA_ClimbCenterOfMassMove`, `IA_ClimbLimbProbe`, `IA_ClimbLeftGrip`, `IA_ClimbRightGrip`, and `IMC_Climbing`.
 - Run PIE with a gamepad and verify left stick, right stick, L2, and R2 each update the expected debug/log value.
 - Confirm left and right grip values are stored separately.
 - Inspect code to confirm `UEnhancedInputComponent` and `UEnhancedInputLocalPlayerSubsystem` are used, not legacy input.
