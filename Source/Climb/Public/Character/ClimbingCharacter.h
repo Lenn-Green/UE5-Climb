@@ -37,7 +37,7 @@ public:
 	UClimbingMovementComponent* GetClimbingMovementComponent() const;
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Input")
-	FVector2D GetClimbCoMInput() const;
+	FVector2D GetClimbCenterOfMassInput() const;
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Input")
 	FVector2D GetClimbLimbProbeInput() const;
@@ -62,7 +62,7 @@ protected:
 	int32 ClimbingInputMappingPriority = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Input")
-	TObjectPtr<UInputAction> ClimbCoMMoveAction;
+	TObjectPtr<UInputAction> ClimbCenterOfMassMoveAction;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Input")
 	TObjectPtr<UInputAction> ClimbLimbProbeAction;
@@ -74,7 +74,7 @@ protected:
 	TObjectPtr<UInputAction> ClimbRightGripAction;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
-	FVector2D ClimbCoMInput = FVector2D::ZeroVector;
+	FVector2D ClimbCenterOfMassInput = FVector2D::ZeroVector;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
 	FVector2D ClimbLimbProbeInput = FVector2D::ZeroVector;
@@ -88,8 +88,8 @@ protected:
 private:
 	void AddClimbingInputMappingContext() const;
 	void BindClimbingInputActions(UInputComponent* PlayerInputComponent);
-	void HandleClimbCoMMove(const FInputActionValue& Value);
-	void HandleClimbCoMMoveCompleted(const FInputActionValue& Value);
+	void HandleClimbCenterOfMassMove(const FInputActionValue& Value);
+	void HandleClimbCenterOfMassMoveCompleted(const FInputActionValue& Value);
 	void HandleClimbLimbProbe(const FInputActionValue& Value);
 	void HandleClimbLimbProbeCompleted(const FInputActionValue& Value);
 	void HandleClimbLeftGrip(const FInputActionValue& Value);

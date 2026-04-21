@@ -72,9 +72,9 @@ UClimbingMovementComponent* AClimbingCharacter::GetClimbingMovementComponent() c
 	return Cast<UClimbingMovementComponent>(GetCharacterMovement());
 }
 
-FVector2D AClimbingCharacter::GetClimbCoMInput() const
+FVector2D AClimbingCharacter::GetClimbCenterOfMassInput() const
 {
-	return ClimbCoMInput;
+	return ClimbCenterOfMassInput;
 }
 
 FVector2D AClimbingCharacter::GetClimbLimbProbeInput() const
@@ -127,10 +127,10 @@ void AClimbingCharacter::BindClimbingInputActions(UInputComponent* PlayerInputCo
 		return;
 	}
 
-	if (ClimbCoMMoveAction)
+	if (ClimbCenterOfMassMoveAction)
 	{
-		EnhancedInputComponent->BindAction(ClimbCoMMoveAction, ETriggerEvent::Triggered, this, &AClimbingCharacter::HandleClimbCoMMove);
-		EnhancedInputComponent->BindAction(ClimbCoMMoveAction, ETriggerEvent::Completed, this, &AClimbingCharacter::HandleClimbCoMMoveCompleted);
+		EnhancedInputComponent->BindAction(ClimbCenterOfMassMoveAction, ETriggerEvent::Triggered, this, &AClimbingCharacter::HandleClimbCenterOfMassMove);
+		EnhancedInputComponent->BindAction(ClimbCenterOfMassMoveAction, ETriggerEvent::Completed, this, &AClimbingCharacter::HandleClimbCenterOfMassMoveCompleted);
 	}
 
 	if (ClimbLimbProbeAction)
@@ -152,14 +152,14 @@ void AClimbingCharacter::BindClimbingInputActions(UInputComponent* PlayerInputCo
 	}
 }
 
-void AClimbingCharacter::HandleClimbCoMMove(const FInputActionValue& Value)
+void AClimbingCharacter::HandleClimbCenterOfMassMove(const FInputActionValue& Value)
 {
-	ClimbCoMInput = Value.Get<FVector2D>();
+	ClimbCenterOfMassInput = Value.Get<FVector2D>();
 }
 
-void AClimbingCharacter::HandleClimbCoMMoveCompleted(const FInputActionValue& Value)
+void AClimbingCharacter::HandleClimbCenterOfMassMoveCompleted(const FInputActionValue& Value)
 {
-	ClimbCoMInput = FVector2D::ZeroVector;
+	ClimbCenterOfMassInput = FVector2D::ZeroVector;
 }
 
 void AClimbingCharacter::HandleClimbLimbProbe(const FInputActionValue& Value)
