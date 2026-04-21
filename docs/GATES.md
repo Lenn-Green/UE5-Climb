@@ -6,10 +6,22 @@ This project uses strict gates. A change is not complete because it compiles or 
 
 - Every implementation task must name the gate or gates it affects.
 - A failed gate blocks completion of the related phase.
+- Every phase must include both command/automated verification and a manual inspection checklist.
+- A phase is incomplete if its tests are not documented, even when the implementation appears to work.
 - If a gate cannot be executed yet, record the missing prerequisite and the next concrete unblocker.
 - Do not weaken a gate to make a change pass.
 - Do not mix unrelated refactors into gate work.
 - Do not modify `.uproject`, `Config`, `Content`, or source files outside the active task without a clear reason.
+
+## Required Test Record
+
+Each completed phase must leave a short test record in the final implementation note or commit message:
+
+- Gates checked.
+- Commands run and whether they passed.
+- Manual checks performed.
+- Checks skipped, with the concrete reason and unblocker.
+- Known residual risks.
 
 ## G0 Project Hygiene
 

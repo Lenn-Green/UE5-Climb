@@ -18,6 +18,13 @@ Acceptance:
 - Editor target builds.
 - No unrelated asset or config churn.
 
+Test checklist:
+
+- Run Unreal project file generation for `Climb.uproject`.
+- Build `ClimbEditor Win64 Development`.
+- Manually inspect `Source/Climb` folder layout and module dependency list.
+- Confirm `git status --short` contains no generated `Binaries`, `Intermediate`, `Saved`, or IDE files.
+
 Mapped gates: `G0`, `G1`.
 
 ## Phase 1 - Climbing Character and Movement Component
@@ -36,6 +43,14 @@ Acceptance:
 - Character compiles and can be used as a base for a Blueprint.
 - Movement component can represent a climbing movement mode or equivalent framework state.
 - State transitions are explicit and observable.
+
+Test checklist:
+
+- Build `ClimbEditor Win64 Development`.
+- Open the editor and create a Blueprint derived from `AClimbingCharacter`.
+- Place the Blueprint in a test map and start PIE.
+- Manually call or trigger `EnterClimbing`, `ExitClimbing`, and jump-prep state APIs through temporary Blueprint/debug hooks.
+- Confirm logs or debug display show one active climbing state at a time.
 
 Mapped gates: `G0`, `G1`, `G4`.
 
@@ -63,6 +78,14 @@ Acceptance:
 - L2 and R2 remain side-specific.
 - No legacy input is used for core climbing controls.
 
+Test checklist:
+
+- Build `ClimbEditor Win64 Development`.
+- Open the editor and inspect `IA_ClimbCoMMove`, `IA_ClimbLimbProbe`, `IA_ClimbLeftGrip`, `IA_ClimbRightGrip`, and `IMC_Climbing`.
+- Run PIE with a gamepad and verify left stick, right stick, L2, and R2 each update the expected debug/log value.
+- Confirm left and right grip values are stored separately.
+- Inspect code to confirm `UEnhancedInputComponent` and `UEnhancedInputLocalPlayerSubsystem` are used, not legacy input.
+
 Mapped gates: `G0`, `G1`, `G2`.
 
 ## Phase 3 - Hold Query and Sphere Trace
@@ -81,6 +104,14 @@ Acceptance:
 - Character can request hold candidates without owning trace implementation.
 - Valid and invalid wall surfaces can be distinguished by an explicit rule.
 - Debug trace visualization is available during development.
+
+Test checklist:
+
+- Build `ClimbEditor Win64 Development`.
+- Run a repeatable debug map or PIE setup with at least one valid hold and one invalid wall surface.
+- Enable trace debug draw and verify sphere paths, hit location, and hit normal are visible.
+- Confirm the owning character is ignored by the query.
+- Inspect code to confirm trace implementation is not inside `AClimbingCharacter`.
 
 Mapped gates: `G0`, `G1`, `G3`.
 
@@ -101,6 +132,14 @@ Acceptance:
 - Releasing a hand clears or transitions that hand through an explicit release path.
 - Invalid hold candidates do not lock a limb.
 
+Test checklist:
+
+- Build `ClimbEditor Win64 Development`.
+- Run PIE and press/release L2 and R2 independently.
+- Verify debug/log output for left hand and right hand limb state changes.
+- Try locking to a valid hold and attempting to lock an invalid surface.
+- Confirm release transitions do not leave contradictory limb or climbing states.
+
 Mapped gates: `G0`, `G2`, `G3`, `G4`.
 
 ## Phase 5 - Minimal Climbing Solver
@@ -119,6 +158,14 @@ Acceptance:
 - Solver functions do not perform traces, read input, mutate actors, or call animation systems.
 - Edge cases for missing contacts and zero-length vectors are handled.
 - Fixed inputs produce repeatable outputs.
+
+Test checklist:
+
+- Build `ClimbEditor Win64 Development`.
+- Run available unit-style solver tests or a deterministic debug command.
+- Verify fixed contact/CoM inputs produce expected stability, tension, and dyno outputs.
+- Test missing contacts, coincident contacts, zero-length vectors, and extreme offsets.
+- Inspect solver code for short geometry comments on non-trivial vector calculations.
 
 Mapped gates: `G0`, `G1`, `G5`.
 
@@ -139,11 +186,20 @@ Acceptance:
 - Animation receives final targets only.
 - Missing Control Rig assets do not block base C++ framework testing.
 
+Test checklist:
+
+- Build `ClimbEditor Win64 Development`.
+- Open the editor and verify the AnimInstance or bridge exposes climbing target data fields.
+- In PIE, confirm debug target values change when C++ state or limb targets change.
+- Confirm missing or unassigned Control Rig assets produce a graceful fallback or warning, not a crash.
+- Inspect code to confirm animation code does not perform traces, solver math, or gameplay state decisions.
+
 Mapped gates: `G0`, `G1`, `G6`.
 
 ## Phase Completion Policy
 
 - A phase can be considered complete only when every mapped gate passes.
+- Every phase completion must include a test record naming commands run, manual checks performed, skipped checks, and known risks.
 - If a mapped gate cannot be fully verified, the implementation note must record why and what unlocks verification.
 - Do not begin tuning advanced mechanics such as resonance swing until Phases 0-6 are stable.
 - Do not add visual polish before input, trace, state, and solver boundaries are in place.
