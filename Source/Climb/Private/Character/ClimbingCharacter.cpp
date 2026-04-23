@@ -2,6 +2,7 @@
 
 #include "Components/ClimbingHoldQueryComponent.h"
 #include "Components/ClimbingMovementComponent.h"
+#include "Solvers/ClimbingSolver.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -484,6 +485,32 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 		AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance +
 		ClimbingDebugState.CenterOfMassTargetOffset;
 
+	const bool bHasLeftHand = LeftHandState.bIsLocked;
+	const bool bHasRightHand = RightHandState.bIsLocked;
+	if (bHasLeftHand && bHasRightHand)
+	{
+		const FClimbingStabilityResult Stability = UClimbingSolver::EstimateTwoPointStability(
+			ClimbingDebugState.CenterOfMassTarget,
+			LeftHandState.ContactLocation,
+			RightHandState.ContactLocation,
+			AttachmentFrame.WallNormal,
+			StableOffsetThreshold);
+
+		ClimbingDebugState.CurrentBodyTension = UClimbingSolver::EstimateBodyTension(
+			ClimbingDebugState.CenterOfMassTarget,
+			LeftHandState.ContactLocation,
+			RightHandState.ContactLocation,
+			MaxBodyTensionOffset);
+		ClimbingDebugState.StabilityPercent = Stability.StabilityPercent;
+		ClimbingDebugState.bIsPoseStable = Stability.bIsStable;
+	}
+	else
+	{
+		ClimbingDebugState.CurrentBodyTension = 0.0f;
+		ClimbingDebugState.StabilityPercent = HasLockedHand() ? 1.0f : 0.0f;
+		ClimbingDebugState.bIsPoseStable = HasLockedHand();
+	}
+
 	UpdateLimbProbeCandidate(AttachmentFrame);
 	DrawClimbingDebugState();
 }
@@ -537,6 +564,17 @@ void AClimbingCharacter::DrawClimbingDebugState() const
 
 	DrawDebugSphere(World, ClimbingDebugState.CenterOfMassTarget, CenterOfMassDebugSphereRadius, 12, FColor::Cyan, false, 0.0f);
 	DrawDebugLine(World, GetActorLocation(), ClimbingDebugState.CenterOfMassTarget, FColor::Cyan, false, 0.0f, 0, 1.5f);
+	const FColor StabilityColor = ClimbingDebugState.bIsPoseStable ? FColor::Green : FColor::Red;
+	DrawDebugDirectionalArrow(
+		World,
+		ClimbingDebugState.CenterOfMassTarget,
+		ClimbingDebugState.CenterOfMassTarget + FVector::UpVector * 25.0f,
+		10.0f,
+		StabilityColor,
+		false,
+		0.0f,
+		0,
+		1.5f);
 
 	if (!ClimbingDebugState.ProbeDirection.IsNearlyZero())
 	{

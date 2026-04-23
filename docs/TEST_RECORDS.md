@@ -255,3 +255,40 @@ Known risks:
 
 - Dual-hand attachment currently uses the average of locked hand contacts; later tuning may need a solver-informed support frame.
 - Transfer flow currently assumes hand grips only and does not yet integrate feet or reachability limits.
+
+## Playable Loop 1 - Stage E - Body Tension Debug Integration
+
+Date: 2026-04-23
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`, `G4`, `G5`, `G6`, `G7`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after wiring `UClimbingSolver` outputs into `FClimbingDebugState`.
+- `UnrealEditor-Cmd.exe ... -ExecCmds="Automation RunTests Climb.Solver; Quit"` completed with exit code `0`.
+- Automation log reported `Success` for all 4 `Climb.Solver` tests:
+  - `Climb.Solver.ProjectCenterOfMassToWallPlane`
+  - `Climb.Solver.EstimateTwoPointStability`
+  - `Climb.Solver.EstimateBodyTension`
+  - `Climb.Solver.CalculateDynoLaunchVelocity`
+- Static inspection confirmed `AClimbingCharacter` still does not own Sweep / Trace implementation.
+- Static inspection confirmed `UClimbingAnimInstance` still does not perform trace, solver, movement, or gameplay state logic.
+
+Manual checks pending:
+
+- In PIE, lock two tagged holds with left and right hands.
+- Move the center-of-mass target with the left-stick substitute input.
+- Confirm `CurrentBodyTension` rises as the CoM target moves farther from the support line between the two hands.
+- Confirm `StabilityPercent` changes and remains finite.
+- Confirm single-hand and no-hand cases do not produce NaN / Inf and do not trigger forced falling from the debug values alone.
+
+Skipped checks:
+
+- No automated gameplay test exists yet for runtime debug-value visualization.
+
+Known risks:
+
+- Single-hand stability currently falls back to a simplified debug state rather than a dedicated one-point solver.
+- Body Tension and stability are still debug-only outputs and do not yet drive gameplay consequences.

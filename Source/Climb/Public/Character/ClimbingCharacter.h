@@ -153,6 +153,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
 	float LimbProbeWallDepth = 35.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
+	float StableOffsetThreshold = 75.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
+	float MaxBodyTensionOffset = 120.0f;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Debug")
 	FClimbingDebugState ClimbingDebugState;
 
