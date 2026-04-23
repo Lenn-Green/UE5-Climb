@@ -173,6 +173,7 @@ private:
 	void TryLockHand(EClimbingLimb Limb);
 	void ReleaseHand(EClimbingLimb Limb);
 	bool HasLockedHand() const;
+	void RefreshClimbingAttachment();
 	void UpdateHandLoadPercentages();
 	FLimbState& GetMutableLimbState(EClimbingLimb Limb);
 	const FLimbState& GetLimbState(EClimbingLimb Limb) const;

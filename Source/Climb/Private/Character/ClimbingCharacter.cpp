@@ -290,24 +290,58 @@ void AClimbingCharacter::TryLockHand(EClimbingLimb Limb)
 
 	ApplyHoldCandidateToLimb(Limb, Candidate);
 	UpdateHandLoadPercentages();
-	EnterClimbingWithAttachment(BuildAttachmentFrameFromLockedHands());
+	RefreshClimbingAttachment();
 }
 
 void AClimbingCharacter::ReleaseHand(EClimbingLimb Limb)
 {
 	const bool bWasLocked = GetLimbState(Limb).bIsLocked;
 	ClearLimb(Limb);
+	ActiveProbeLimb = Limb;
 	UpdateHandLoadPercentages();
 
 	if (bWasLocked && !HasLockedHand() && IsClimbing())
 	{
 		ExitClimbing();
+		return;
+	}
+
+	if (bWasLocked && HasLockedHand() && IsClimbing())
+	{
+		RefreshClimbingAttachment();
 	}
 }
 
 bool AClimbingCharacter::HasLockedHand() const
 {
 	return LeftHandState.bIsLocked || RightHandState.bIsLocked;
+}
+
+void AClimbingCharacter::RefreshClimbingAttachment()
+{
+	const FClimbingAttachmentFrame AttachmentFrame = BuildAttachmentFrameFromLockedHands();
+	if (!AttachmentFrame.bIsValid)
+	{
+		if (IsClimbing())
+		{
+			ExitClimbing();
+		}
+		return;
+	}
+
+	if (UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent())
+	{
+		if (ClimbingMovement->IsInClimbingMovementMode())
+		{
+			ClimbingMovement->UpdateClimbingAttachmentFrame(AttachmentFrame);
+		}
+		else
+		{
+			ClimbingMovement->StartClimbingMovement(AttachmentFrame);
+		}
+	}
+
+	SetClimbingState(EClimbingState::Climbing);
 }
 
 void AClimbingCharacter::UpdateHandLoadPercentages()
