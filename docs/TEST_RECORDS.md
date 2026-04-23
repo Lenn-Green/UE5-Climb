@@ -101,21 +101,23 @@ Known risks:
 
 Date: 2026-04-23
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`
+Gates checked: `G0`, `G1`, `G6`
 
 Command verification:
 
 - `ClimbEditor Win64 Development` build passed after adding `UClimbingAnimInstance`.
 - Static inspection confirmed animation bridge code does not call trace, solver, Control Rig, or climbing state transition APIs.
 
-Manual checks pending:
+Manual checks:
 
-- Create or open an Anim Blueprint that derives from `UClimbingAnimInstance`.
-- Assign the Anim Blueprint to `BP_ClimbingCharacter`.
-- In PIE, confirm exposed climbing animation fields update when hand grip state changes.
-- Confirm missing Control Rig assets do not crash the character or animation instance.
+- Created `ABP_ClimbingCharacter` derived from `UClimbingAnimInstance`.
+- Assigned the climbing Anim Blueprint to `BP_ClimbingCharacter`.
+- Confirmed the Anim Blueprint can access exposed bridge fields such as `ClimbingState`, `bIsClimbing`, `LeftHandTarget`, and `RightHandTarget`.
+- PIE test confirmed exposed climbing animation fields update when hand grip state changes.
+- PIE test confirmed missing Control Rig assets do not crash the character or animation instance.
+- Moved climbing character assets under `Content/Climb/Characters/` during editor setup.
 
 Skipped checks:
 
