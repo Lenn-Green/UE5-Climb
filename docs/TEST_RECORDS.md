@@ -196,9 +196,9 @@ Known risks:
 
 Date: 2026-04-23
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G7`
+Gates checked: `G0`, `G1`, `G2`, `G3`, `G7`
 
 Command verification:
 
@@ -206,13 +206,14 @@ Command verification:
 - Static inspection confirmed `AClimbingCharacter` computes probe origin and direction only; it still does not own Sweep / Trace implementation.
 - Static inspection confirmed `UClimbingAnimInstance` still does not perform trace, movement, solver, or gameplay state logic.
 
-Manual checks pending:
+Manual checks:
 
 - In PIE, enter climbing on a tagged hold and move the right-stick substitute input.
 - Confirm the orange probe line changes direction while climbing.
 - Confirm a valid nearby `ClimbingHold` becomes the current candidate and shows a yellow marker.
 - Confirm probe movement toward an untagged wall does not produce a valid candidate.
 - Confirm pressing the opposite hand grip while climbing uses the current candidate instead of the fallback viewpoint query.
+- Added temporary keyboard mappings in `IMC_Climbing` to test limb probe movement without a gamepad.
 
 Skipped checks:
 
