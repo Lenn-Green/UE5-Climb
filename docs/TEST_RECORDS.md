@@ -164,9 +164,9 @@ Known risks:
 
 Date: 2026-04-23
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`, `G2`, `G6`, `G7`
+Gates checked: `G0`, `G1`, `G2`, `G6`, `G7`
 
 Command verification:
 
@@ -174,13 +174,14 @@ Command verification:
 - Static inspection confirmed `UClimbingAnimInstance` only copies the C++ debug offset into `PelvisOffset` and does not perform trace, solver, movement, or state transition logic.
 - Static inspection confirmed `AClimbingCharacter` still does not own Sweep / Trace implementation.
 
-Manual checks pending:
+Manual checks:
 
 - In PIE, grab a valid hold and move the left stick.
 - Confirm the cyan CoM debug sphere moves in the wall-local right/up plane.
 - Confirm horizontal offset clamps at about `60cm` and vertical offset clamps at about `80cm`.
 - Confirm releasing the stick returns the CoM debug sphere to the attachment center.
 - Confirm `ABP_ClimbingCharacter` can read the updated `PelvisOffset`.
+- Added temporary keyboard mappings in `IMC_Climbing` to test center-of-mass movement without a gamepad.
 
 Skipped checks:
 
