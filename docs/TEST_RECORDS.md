@@ -96,3 +96,33 @@ Known risks:
 
 - Solver formulas are deterministic framework estimates, not final climbing-feel tuning.
 - Two-point stability currently models the support region as a segment, not a full multi-limb support polygon.
+
+## Phase 6 - Animation and Control Rig Bridge Placeholder
+
+Date: 2026-04-23
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding `UClimbingAnimInstance`.
+- Static inspection confirmed animation bridge code does not call trace, solver, Control Rig, or climbing state transition APIs.
+
+Manual checks pending:
+
+- Create or open an Anim Blueprint that derives from `UClimbingAnimInstance`.
+- Assign the Anim Blueprint to `BP_ClimbingCharacter`.
+- In PIE, confirm exposed climbing animation fields update when hand grip state changes.
+- Confirm missing Control Rig assets do not crash the character or animation instance.
+
+Skipped checks:
+
+- No Control Rig variable binding was implemented in this phase.
+- No automated animation graph test exists yet.
+
+Known risks:
+
+- `PelvisOffset` is currently a zero placeholder until the procedural Z-axis policy is implemented.
+- The bridge exposes target data only; actual FBIK / Control Rig consumption still needs a future asset pass.
