@@ -191,3 +191,34 @@ Known risks:
 
 - `PelvisOffset` is a raw world-space debug offset for now; final Control Rig consumption may need local-space conversion.
 - CoM target currently snaps to input values rather than using a smoothing model.
+
+## Playable Loop 1 - Stage C - Right-Stick Limb Probe
+
+Date: 2026-04-23
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G7`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding limb probe candidate caching and wall-plane probe direction logic.
+- Static inspection confirmed `AClimbingCharacter` computes probe origin and direction only; it still does not own Sweep / Trace implementation.
+- Static inspection confirmed `UClimbingAnimInstance` still does not perform trace, movement, solver, or gameplay state logic.
+
+Manual checks pending:
+
+- In PIE, enter climbing on a tagged hold and move the right-stick substitute input.
+- Confirm the orange probe line changes direction while climbing.
+- Confirm a valid nearby `ClimbingHold` becomes the current candidate and shows a yellow marker.
+- Confirm probe movement toward an untagged wall does not produce a valid candidate.
+- Confirm pressing the opposite hand grip while climbing uses the current candidate instead of the fallback viewpoint query.
+
+Skipped checks:
+
+- No automated gameplay test exists yet for probe candidate selection.
+
+Known risks:
+
+- Probe targeting currently uses wall-plane offsets from the current attachment frame and active hand contact; later tuning may need camera influence for better feel.
+- Candidate selection still uses simple distance score from `UClimbingHoldQueryComponent` and does not yet consider reachability or body tension.

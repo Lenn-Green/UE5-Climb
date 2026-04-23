@@ -144,6 +144,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
 	float CenterOfMassDebugSphereRadius = 8.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float LimbProbeHorizontalRange = 120.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float LimbProbeVerticalRange = 120.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float LimbProbeWallDepth = 35.0f;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Debug")
 	FClimbingDebugState ClimbingDebugState;
 
@@ -172,6 +181,8 @@ private:
 	FClimbingAttachmentFrame BuildAttachmentFrameFromLockedHands() const;
 	static void FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame);
 	void UpdateClimbingDebugState(float DeltaSeconds);
+	void UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame);
+	FVector GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const;
 	void DrawClimbingDebugState() const;
 	void SetClimbingState(EClimbingState NewState);
 };

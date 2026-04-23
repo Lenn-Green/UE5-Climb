@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Data/ClimbingHoldTypes.h"
 #include "ClimbingMovementTypes.generated.h"
 
 USTRUCT(BlueprintType)
@@ -40,6 +41,15 @@ struct CLIMB_API FClimbingDebugState
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
 	FVector CenterOfMassTargetOffset = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
+	FVector ProbeOrigin = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
+	FVector ProbeDirection = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
+	FClimbingHoldCandidate CurrentHoldCandidate;
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", ClampMax="1.0"))
 	float CurrentBodyTension = 0.0f;

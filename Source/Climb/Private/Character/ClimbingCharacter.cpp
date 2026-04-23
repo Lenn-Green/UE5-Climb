@@ -268,13 +268,21 @@ void AClimbingCharacter::TryLockHand(EClimbingLimb Limb)
 {
 	ActiveProbeLimb = Limb;
 
-	if (!HoldQueryComponent)
+	FClimbingHoldCandidate Candidate;
+	if (IsClimbing() && ClimbingDebugState.CurrentHoldCandidate.bIsValid)
 	{
-		return;
+		Candidate = ClimbingDebugState.CurrentHoldCandidate;
+	}
+	else
+	{
+		if (!HoldQueryComponent || !HoldQueryComponent->QueryBestHoldFromViewpoint(Candidate))
+		{
+			UE_LOG(LogTemp, Verbose, TEXT("No valid climbing hold found for %s."), *UEnum::GetValueAsString(Limb));
+			return;
+		}
 	}
 
-	FClimbingHoldCandidate Candidate;
-	if (!HoldQueryComponent->QueryBestHoldFromViewpoint(Candidate))
+	if (!Candidate.bIsValid)
 	{
 		UE_LOG(LogTemp, Verbose, TEXT("No valid climbing hold found for %s."), *UEnum::GetValueAsString(Limb));
 		return;
@@ -442,7 +450,42 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 		AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance +
 		ClimbingDebugState.CenterOfMassTargetOffset;
 
+	UpdateLimbProbeCandidate(AttachmentFrame);
 	DrawClimbingDebugState();
+}
+
+void AClimbingCharacter::UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame)
+{
+	ClimbingDebugState.ProbeOrigin = GetActiveLimbProbeOrigin(AttachmentFrame);
+
+	const FVector ProbeOffset =
+		AttachmentFrame.WallRight.GetSafeNormal() * (ClimbLimbProbeInput.X * LimbProbeHorizontalRange) +
+		AttachmentFrame.WallUp.GetSafeNormal() * (ClimbLimbProbeInput.Y * LimbProbeVerticalRange);
+	const FVector ProbeTarget =
+		AttachmentFrame.AnchorLocation +
+		ProbeOffset -
+		AttachmentFrame.WallNormal.GetSafeNormal() * LimbProbeWallDepth;
+	ClimbingDebugState.ProbeDirection = (ProbeTarget - ClimbingDebugState.ProbeOrigin).GetSafeNormal();
+
+	FClimbingHoldCandidate Candidate;
+	if (HoldQueryComponent && HoldQueryComponent->QueryBestHold(ClimbingDebugState.ProbeOrigin, ClimbingDebugState.ProbeDirection, Candidate))
+	{
+		ClimbingDebugState.CurrentHoldCandidate = Candidate;
+		return;
+	}
+
+	ClimbingDebugState.CurrentHoldCandidate = FClimbingHoldCandidate();
+}
+
+FVector AClimbingCharacter::GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const
+{
+	const FLimbState& ActiveLimbState = GetLimbState(ActiveProbeLimb);
+	if (ActiveLimbState.bIsLocked || ActiveLimbState.bHasValidContact)
+	{
+		return ActiveLimbState.ContactLocation + AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance;
+	}
+
+	return AttachmentFrame.AnchorLocation + AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance;
 }
 
 void AClimbingCharacter::DrawClimbingDebugState() const
@@ -460,6 +503,17 @@ void AClimbingCharacter::DrawClimbingDebugState() const
 
 	DrawDebugSphere(World, ClimbingDebugState.CenterOfMassTarget, CenterOfMassDebugSphereRadius, 12, FColor::Cyan, false, 0.0f);
 	DrawDebugLine(World, GetActorLocation(), ClimbingDebugState.CenterOfMassTarget, FColor::Cyan, false, 0.0f, 0, 1.5f);
+
+	if (!ClimbingDebugState.ProbeDirection.IsNearlyZero())
+	{
+		const FVector ProbeEnd = ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * 120.0f;
+		DrawDebugLine(World, ClimbingDebugState.ProbeOrigin, ProbeEnd, FColor::Orange, false, 0.0f, 0, 1.5f);
+	}
+
+	if (ClimbingDebugState.CurrentHoldCandidate.bIsValid)
+	{
+		DrawDebugSphere(World, ClimbingDebugState.CurrentHoldCandidate.Location, 10.0f, 12, FColor::Yellow, false, 0.0f);
+	}
 }
 
 void AClimbingCharacter::SetClimbingState(EClimbingState NewState)
