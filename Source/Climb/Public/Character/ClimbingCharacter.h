@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Data/ClimbingHoldTypes.h"
+#include "Data/ClimbingLimbTypes.h"
 #include "Data/ClimbingTypes.h"
 #include "ClimbingCharacter.generated.h"
 
@@ -52,6 +54,21 @@ public:
 	UFUNCTION(BlueprintPure, Category="Climbing|Input")
 	float GetRightGripInput() const;
 
+	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
+	FLimbState GetLeftHandState() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
+	FLimbState GetRightHandState() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
+	FLimbState GetLeftFootState() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
+	FLimbState GetRightFootState() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
+	EClimbingLimb GetActiveProbeLimb() const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -89,6 +106,24 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
 	float RightGripInput = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Grip", meta=(ClampMin="0.0", ClampMax="1.0"))
+	float GripPressedThreshold = 0.35f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
+	FLimbState LeftHandState;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
+	FLimbState RightHandState;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
+	FLimbState LeftFootState;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
+	FLimbState RightFootState;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
+	EClimbingLimb ActiveProbeLimb = EClimbingLimb::RightHand;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Climbing|Components")
 	TObjectPtr<UClimbingHoldQueryComponent> HoldQueryComponent;
 
@@ -103,5 +138,13 @@ private:
 	void HandleClimbLeftGripCompleted(const FInputActionValue& Value);
 	void HandleClimbRightGrip(const FInputActionValue& Value);
 	void HandleClimbRightGripCompleted(const FInputActionValue& Value);
+	void TryLockHand(EClimbingLimb Limb);
+	void ReleaseHand(EClimbingLimb Limb);
+	bool HasLockedHand() const;
+	void UpdateHandLoadPercentages();
+	FLimbState& GetMutableLimbState(EClimbingLimb Limb);
+	const FLimbState& GetLimbState(EClimbingLimb Limb) const;
+	void ApplyHoldCandidateToLimb(EClimbingLimb Limb, const FClimbingHoldCandidate& Candidate);
+	void ClearLimb(EClimbingLimb Limb);
 	void SetClimbingState(EClimbingState NewState);
 };

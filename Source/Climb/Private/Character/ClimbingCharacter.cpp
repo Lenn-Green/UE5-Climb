@@ -13,6 +13,10 @@ AClimbingCharacter::AClimbingCharacter(const FObjectInitializer& ObjectInitializ
 {
 	PrimaryActorTick.bCanEverTick = true;
 	HoldQueryComponent = CreateDefaultSubobject<UClimbingHoldQueryComponent>(TEXT("HoldQueryComponent"));
+	LeftHandState.Limb = EClimbingLimb::LeftHand;
+	RightHandState.Limb = EClimbingLimb::RightHand;
+	LeftFootState.Limb = EClimbingLimb::LeftFoot;
+	RightFootState.Limb = EClimbingLimb::RightFoot;
 }
 
 void AClimbingCharacter::BeginPlay()
@@ -99,6 +103,31 @@ float AClimbingCharacter::GetRightGripInput() const
 	return RightGripInput;
 }
 
+FLimbState AClimbingCharacter::GetLeftHandState() const
+{
+	return LeftHandState;
+}
+
+FLimbState AClimbingCharacter::GetRightHandState() const
+{
+	return RightHandState;
+}
+
+FLimbState AClimbingCharacter::GetLeftFootState() const
+{
+	return LeftFootState;
+}
+
+FLimbState AClimbingCharacter::GetRightFootState() const
+{
+	return RightFootState;
+}
+
+EClimbingLimb AClimbingCharacter::GetActiveProbeLimb() const
+{
+	return ActiveProbeLimb;
+}
+
 void AClimbingCharacter::AddClimbingInputMappingContext() const
 {
 	if (!ClimbingInputMappingContext)
@@ -181,22 +210,133 @@ void AClimbingCharacter::HandleClimbLimbProbeCompleted(const FInputActionValue& 
 
 void AClimbingCharacter::HandleClimbLeftGrip(const FInputActionValue& Value)
 {
+	const bool bWasPressed = LeftGripInput >= GripPressedThreshold;
 	LeftGripInput = Value.Get<float>();
+	const bool bIsPressed = LeftGripInput >= GripPressedThreshold;
+	if (!bWasPressed && bIsPressed)
+	{
+		TryLockHand(EClimbingLimb::LeftHand);
+	}
 }
 
 void AClimbingCharacter::HandleClimbLeftGripCompleted(const FInputActionValue& Value)
 {
 	LeftGripInput = 0.0f;
+	ReleaseHand(EClimbingLimb::LeftHand);
 }
 
 void AClimbingCharacter::HandleClimbRightGrip(const FInputActionValue& Value)
 {
+	const bool bWasPressed = RightGripInput >= GripPressedThreshold;
 	RightGripInput = Value.Get<float>();
+	const bool bIsPressed = RightGripInput >= GripPressedThreshold;
+	if (!bWasPressed && bIsPressed)
+	{
+		TryLockHand(EClimbingLimb::RightHand);
+	}
 }
 
 void AClimbingCharacter::HandleClimbRightGripCompleted(const FInputActionValue& Value)
 {
 	RightGripInput = 0.0f;
+	ReleaseHand(EClimbingLimb::RightHand);
+}
+
+void AClimbingCharacter::TryLockHand(EClimbingLimb Limb)
+{
+	ActiveProbeLimb = Limb;
+
+	if (!HoldQueryComponent)
+	{
+		return;
+	}
+
+	FClimbingHoldCandidate Candidate;
+	if (!HoldQueryComponent->QueryBestHoldFromViewpoint(Candidate))
+	{
+		UE_LOG(LogTemp, Verbose, TEXT("No valid climbing hold found for %s."), *UEnum::GetValueAsString(Limb));
+		return;
+	}
+
+	ApplyHoldCandidateToLimb(Limb, Candidate);
+	UpdateHandLoadPercentages();
+	EnterClimbing();
+}
+
+void AClimbingCharacter::ReleaseHand(EClimbingLimb Limb)
+{
+	const bool bWasLocked = GetLimbState(Limb).bIsLocked;
+	ClearLimb(Limb);
+	UpdateHandLoadPercentages();
+
+	if (bWasLocked && !HasLockedHand() && IsClimbing())
+	{
+		ExitClimbing();
+	}
+}
+
+bool AClimbingCharacter::HasLockedHand() const
+{
+	return LeftHandState.bIsLocked || RightHandState.bIsLocked;
+}
+
+void AClimbingCharacter::UpdateHandLoadPercentages()
+{
+	const int32 LockedHandCount = (LeftHandState.bIsLocked ? 1 : 0) + (RightHandState.bIsLocked ? 1 : 0);
+	LeftHandState.LoadPercent = LeftHandState.bIsLocked && LockedHandCount > 0 ? 1.0f / LockedHandCount : 0.0f;
+	RightHandState.LoadPercent = RightHandState.bIsLocked && LockedHandCount > 0 ? 1.0f / LockedHandCount : 0.0f;
+}
+
+FLimbState& AClimbingCharacter::GetMutableLimbState(EClimbingLimb Limb)
+{
+	switch (Limb)
+	{
+	case EClimbingLimb::LeftHand:
+		return LeftHandState;
+	case EClimbingLimb::RightHand:
+		return RightHandState;
+	case EClimbingLimb::LeftFoot:
+		return LeftFootState;
+	case EClimbingLimb::RightFoot:
+	default:
+		return RightFootState;
+	}
+}
+
+const FLimbState& AClimbingCharacter::GetLimbState(EClimbingLimb Limb) const
+{
+	switch (Limb)
+	{
+	case EClimbingLimb::LeftHand:
+		return LeftHandState;
+	case EClimbingLimb::RightHand:
+		return RightHandState;
+	case EClimbingLimb::LeftFoot:
+		return LeftFootState;
+	case EClimbingLimb::RightFoot:
+	default:
+		return RightFootState;
+	}
+}
+
+void AClimbingCharacter::ApplyHoldCandidateToLimb(EClimbingLimb Limb, const FClimbingHoldCandidate& Candidate)
+{
+	FLimbState& LimbState = GetMutableLimbState(Limb);
+	LimbState.bHasValidContact = Candidate.bIsValid;
+	LimbState.bIsLocked = Candidate.bIsValid;
+	LimbState.ContactLocation = Candidate.Location;
+	LimbState.ContactNormal = Candidate.Normal;
+	LimbState.ContactRotation = Candidate.Normal.ToOrientationRotator();
+	LimbState.ContactActor = Candidate.Actor;
+	LimbState.ContactComponent = Candidate.Component;
+}
+
+void AClimbingCharacter::ClearLimb(EClimbingLimb Limb)
+{
+	FLimbState& LimbState = GetMutableLimbState(Limb);
+	const EClimbingLimb LimbId = LimbState.Limb;
+	LimbState = FLimbState();
+	LimbState.Limb = LimbId;
 }
 
 void AClimbingCharacter::SetClimbingState(EClimbingState NewState)
