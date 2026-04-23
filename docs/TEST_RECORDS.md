@@ -133,9 +133,9 @@ Known risks:
 
 Date: 2026-04-23
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`, `G3`, `G4`, `G7`
+Gates checked: `G0`, `G1`, `G3`, `G4`, `G7`
 
 Command verification:
 
@@ -143,12 +143,13 @@ Command verification:
 - Static inspection confirmed movement attachment and target correction live in `UClimbingMovementComponent`.
 - Static inspection confirmed `AClimbingCharacter` still delegates hold query to `UClimbingHoldQueryComponent` and does not own Sweep / Trace implementation.
 
-Manual checks pending:
+Manual checks:
 
 - In PIE, grab a tagged `ClimbingHold` with L2 and confirm the character does not fall while the left hand remains locked.
 - Repeat with R2 and confirm the right hand can attach independently.
 - Try an untagged wall and confirm the character does not enter climbing.
 - Release the final locked hand and confirm the character enters Falling and drops.
+- Adjusted and verified the third-person camera setup on `BP_ClimbingCharacter` during manual testing.
 
 Skipped checks:
 
