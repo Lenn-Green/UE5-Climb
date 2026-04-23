@@ -40,6 +40,7 @@
 - `MEMORY.md`：项目长期上下文、当前状态和阶段优先级。
 - `docs/GATES.md`：严格门禁系统，定义每个阶段通过标准。
 - `docs/IMPLEMENTATION_PLAN.md`：基础框架的分阶段实施计划。
+- `docs/TEST_RECORDS.md`：阶段测试记录，包含命令验证、手动检查、跳过项和风险。
 - `.codex/skills/climb-ue5-hardcore-climbing/SKILL.md`：项目本地 Codex skill，用于后续自动加载本项目工作流。
 
 ## 下一步
