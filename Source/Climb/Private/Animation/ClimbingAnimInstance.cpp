@@ -21,6 +21,11 @@ AClimbingCharacter* UClimbingAnimInstance::GetClimbingCharacter() const
 	return ClimbingCharacter;
 }
 
+FClimbingControlRigTargets UClimbingAnimInstance::GetControlRigTargets() const
+{
+	return ControlRigTargets;
+}
+
 void UClimbingAnimInstance::ResolveClimbingCharacter()
 {
 	if (ClimbingCharacter)
@@ -50,6 +55,7 @@ void UClimbingAnimInstance::SnapshotClimbingData()
 	RightHandTarget = MakeAnimTarget(ClimbingCharacter->GetRightHandState());
 	LeftFootTarget = MakeAnimTarget(ClimbingCharacter->GetLeftFootState());
 	RightFootTarget = MakeAnimTarget(ClimbingCharacter->GetRightFootState());
+	UpdateControlRigTargets();
 }
 
 FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& LimbState)
@@ -63,6 +69,17 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& 
 	Target.TargetRotation = LimbState.ContactRotation;
 	Target.LoadPercent = LimbState.LoadPercent;
 	return Target;
+}
+
+void UClimbingAnimInstance::UpdateControlRigTargets()
+{
+	ControlRigTargets.bIsClimbing = bIsClimbing;
+	ControlRigTargets.ActiveProbeLimb = ActiveProbeLimb;
+	ControlRigTargets.PelvisOffset = PelvisOffset;
+	ControlRigTargets.LeftHandTarget = LeftHandTarget;
+	ControlRigTargets.RightHandTarget = RightHandTarget;
+	ControlRigTargets.LeftFootTarget = LeftFootTarget;
+	ControlRigTargets.RightFootTarget = RightFootTarget;
 }
 
 void UClimbingAnimInstance::ResetClimbingData()
@@ -85,4 +102,6 @@ void UClimbingAnimInstance::ResetClimbingData()
 
 	RightFootTarget = FClimbingLimbAnimTarget();
 	RightFootTarget.Limb = EClimbingLimb::RightFoot;
+
+	UpdateControlRigTargets();
 }

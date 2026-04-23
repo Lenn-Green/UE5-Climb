@@ -35,6 +35,33 @@ struct CLIMB_API FClimbingLimbAnimTarget
 	float LoadPercent = 0.0f;
 };
 
+USTRUCT(BlueprintType)
+struct CLIMB_API FClimbingControlRigTargets
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bIsClimbing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimb ActiveProbeLimb = EClimbingLimb::RightHand;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FVector PelvisOffset = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget LeftHandTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget RightHandTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget LeftFootTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget RightFootTarget;
+};
+
 UCLASS()
 class CLIMB_API UClimbingAnimInstance : public UAnimInstance
 {
@@ -46,6 +73,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Animation")
 	AClimbingCharacter* GetClimbingCharacter() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Animation")
+	FClimbingControlRigTargets GetControlRigTargets() const;
 
 protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
@@ -81,9 +111,15 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget RightFootTarget;
 
+	// Suggested Control Rig variable contract:
+	// PelvisOffset, LeftHandTarget, RightHandTarget, LeftFootTarget, RightFootTarget, ActiveProbeLimb.
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingControlRigTargets ControlRigTargets;
+
 private:
 	void ResolveClimbingCharacter();
 	void SnapshotClimbingData();
 	static FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState);
+	void UpdateControlRigTargets();
 	void ResetClimbingData();
 };

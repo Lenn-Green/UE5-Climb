@@ -292,3 +292,26 @@ Known risks:
 
 - Single-hand stability currently falls back to a simplified debug state rather than a dedicated one-point solver.
 - Body Tension and stability are still debug-only outputs and do not yet drive gameplay consequences.
+
+## Control Rig Bridge Scaffold
+
+Date: 2026-04-23
+
+Status: command-verified
+
+Gates checked: `G0`, `G1`, `G6`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding `ControlRigTargets` to `UClimbingAnimInstance`.
+- Static inspection confirmed the new bridge package only groups existing animation-facing values and does not introduce gameplay authority into animation.
+- Added `docs/CONTROL_RIG_BRIDGE.md` to document the future variable contract for `ABP_ClimbingCharacter` and `CR_ClimbingBody`.
+
+Manual checks skipped:
+
+- No editor asset wiring was performed yet for an actual climbing Control Rig asset.
+
+Known risks:
+
+- The bridge contract is now explicit, but the actual Control Rig asset and FBIK graph are still unimplemented.
+- `ControlRigTargets` currently mirrors animation-facing values; if future rig needs local-space targets, that conversion still needs to be designed.
