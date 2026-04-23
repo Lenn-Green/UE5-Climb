@@ -7,6 +7,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "DrawDebugHelpers.h"
 
 AClimbingCharacter::AClimbingCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UClimbingMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -26,6 +27,12 @@ void AClimbingCharacter::BeginPlay()
 	const UCharacterMovementComponent* Movement = GetCharacterMovement();
 	SetClimbingState(Movement && Movement->IsMovingOnGround() ? EClimbingState::Grounded : EClimbingState::Falling);
 	AddClimbingInputMappingContext();
+}
+
+void AClimbingCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	UpdateClimbingDebugState(DeltaSeconds);
 }
 
 void AClimbingCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -136,6 +143,11 @@ FLimbState AClimbingCharacter::GetRightFootState() const
 EClimbingLimb AClimbingCharacter::GetActiveProbeLimb() const
 {
 	return ActiveProbeLimb;
+}
+
+FClimbingDebugState AClimbingCharacter::GetClimbingDebugState() const
+{
+	return ClimbingDebugState;
 }
 
 void AClimbingCharacter::AddClimbingInputMappingContext() const
@@ -403,6 +415,51 @@ void AClimbingCharacter::FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame)
 	{
 		AttachmentFrame.WallUp = FVector::UpVector;
 	}
+}
+
+void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
+{
+	const UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent();
+	const FClimbingAttachmentFrame AttachmentFrame = ClimbingMovement ? ClimbingMovement->GetClimbingAttachmentFrame() : FClimbingAttachmentFrame();
+	if (!IsClimbing() || !AttachmentFrame.bIsValid)
+	{
+		ClimbingDebugState = FClimbingDebugState();
+		return;
+	}
+
+	const FVector WallRight = AttachmentFrame.WallRight.GetSafeNormal();
+	const FVector WallUp = AttachmentFrame.WallUp.GetSafeNormal();
+	const FVector2D ClampedInput(
+		FMath::Clamp(ClimbCenterOfMassInput.X, -1.0f, 1.0f),
+		FMath::Clamp(ClimbCenterOfMassInput.Y, -1.0f, 1.0f));
+
+	// CoM debug motion is constrained to the wall tangent plane using the attachment frame right/up axes.
+	ClimbingDebugState.CenterOfMassTargetOffset =
+		WallRight * (ClampedInput.X * MaxCenterOfMassHorizontalOffset) +
+		WallUp * (ClampedInput.Y * MaxCenterOfMassVerticalOffset);
+	ClimbingDebugState.CenterOfMassTarget =
+		AttachmentFrame.AnchorLocation +
+		AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance +
+		ClimbingDebugState.CenterOfMassTargetOffset;
+
+	DrawClimbingDebugState();
+}
+
+void AClimbingCharacter::DrawClimbingDebugState() const
+{
+	if (!bDrawClimbingDebug)
+	{
+		return;
+	}
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	DrawDebugSphere(World, ClimbingDebugState.CenterOfMassTarget, CenterOfMassDebugSphereRadius, 12, FColor::Cyan, false, 0.0f);
+	DrawDebugLine(World, GetActorLocation(), ClimbingDebugState.CenterOfMassTarget, FColor::Cyan, false, 0.0f, 0, 1.5f);
 }
 
 void AClimbingCharacter::SetClimbingState(EClimbingState NewState)

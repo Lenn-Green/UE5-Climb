@@ -73,8 +73,12 @@ public:
 	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
 	EClimbingLimb GetActiveProbeLimb() const;
 
+	UFUNCTION(BlueprintPure, Category="Climbing|Debug")
+	FClimbingDebugState GetClimbingDebugState() const;
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|State")
@@ -128,6 +132,21 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
 	EClimbingLimb ActiveProbeLimb = EClimbingLimb::RightHand;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float MaxCenterOfMassHorizontalOffset = 60.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float MaxCenterOfMassVerticalOffset = 80.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug")
+	bool bDrawClimbingDebug = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
+	float CenterOfMassDebugSphereRadius = 8.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Debug")
+	FClimbingDebugState ClimbingDebugState;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Climbing|Components")
 	TObjectPtr<UClimbingHoldQueryComponent> HoldQueryComponent;
 
@@ -152,5 +171,7 @@ private:
 	void ClearLimb(EClimbingLimb Limb);
 	FClimbingAttachmentFrame BuildAttachmentFrameFromLockedHands() const;
 	static void FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame);
+	void UpdateClimbingDebugState(float DeltaSeconds);
+	void DrawClimbingDebugState() const;
 	void SetClimbingState(EClimbingState NewState);
 };

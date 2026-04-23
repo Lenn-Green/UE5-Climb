@@ -44,7 +44,7 @@ void UClimbingAnimInstance::SnapshotClimbingData()
 	ActiveProbeLimb = ClimbingCharacter->GetActiveProbeLimb();
 	CenterOfMassInput = ClimbingCharacter->GetClimbCenterOfMassInput();
 	LimbProbeInput = ClimbingCharacter->GetClimbLimbProbeInput();
-	PelvisOffset = FVector::ZeroVector;
+	PelvisOffset = ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset;
 
 	LeftHandTarget = MakeAnimTarget(ClimbingCharacter->GetLeftHandState());
 	RightHandTarget = MakeAnimTarget(ClimbingCharacter->GetRightHandState());

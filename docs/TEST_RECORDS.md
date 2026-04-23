@@ -159,3 +159,34 @@ Known risks:
 
 - Attachment target currently uses locked hand contact points and wall normals directly; final body spacing will need tuning once CoM and animation offsets are active.
 - The Blueprint-exposed attachment entry point is named `StartClimbingMovementWithAttachment` because Unreal Header Tool does not allow two reflected `StartClimbingMovement` overloads.
+
+## Playable Loop 1 - Stage B - Center-of-Mass Debug Offset
+
+Date: 2026-04-23
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`, `G2`, `G6`, `G7`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding `FClimbingDebugState` and center-of-mass debug target calculation.
+- Static inspection confirmed `UClimbingAnimInstance` only copies the C++ debug offset into `PelvisOffset` and does not perform trace, solver, movement, or state transition logic.
+- Static inspection confirmed `AClimbingCharacter` still does not own Sweep / Trace implementation.
+
+Manual checks pending:
+
+- In PIE, grab a valid hold and move the left stick.
+- Confirm the cyan CoM debug sphere moves in the wall-local right/up plane.
+- Confirm horizontal offset clamps at about `60cm` and vertical offset clamps at about `80cm`.
+- Confirm releasing the stick returns the CoM debug sphere to the attachment center.
+- Confirm `ABP_ClimbingCharacter` can read the updated `PelvisOffset`.
+
+Skipped checks:
+
+- No automated gameplay test exists yet for CoM debug target movement.
+
+Known risks:
+
+- `PelvisOffset` is a raw world-space debug offset for now; final Control Rig consumption may need local-space conversion.
+- CoM target currently snaps to input values rather than using a smoothing model.
