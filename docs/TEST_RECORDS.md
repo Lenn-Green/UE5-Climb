@@ -228,9 +228,9 @@ Known risks:
 
 Date: 2026-04-23
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
+Gates checked: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
 
 Command verification:
 
@@ -238,13 +238,14 @@ Command verification:
 - Static inspection confirmed `AClimbingCharacter` still does not own Sweep / Trace implementation.
 - Static inspection confirmed `UClimbingAnimInstance` still does not perform gameplay state, movement, or hold query logic.
 
-Manual checks pending:
+Manual checks:
 
 - In PIE, lock hold A with the left hand.
 - Use limb probe input to select hold B and lock it with the right hand.
 - Confirm both hands stay locked and load is approximately `0.5 / 0.5`.
 - Release the left hand and confirm the right hand remains locked, load becomes `1.0`, and the character stays in `Climbing`.
 - Release the final locked hand and confirm the character returns to `Falling`.
+- Verified `LoadPercent` through temporary Blueprint debug inspection in `BP_ClimbingCharacter`.
 
 Skipped checks:
 
