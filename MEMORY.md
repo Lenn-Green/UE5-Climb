@@ -10,14 +10,18 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
 
 - Workspace path: `C:\Users\tangyue\Documents\Unreal Projects\Climb`.
 - Engine version: UE 5.4 from `Climb.uproject`.
-- Current project base: ThirdPerson Blueprint template.
-- Existing top-level folders: `Config`, `Content`, `DerivedDataCache`, `Intermediate`, `Saved`.
-- No `Source/` C++ module exists yet.
-- `Config/DefaultInput.ini` uses Enhanced Input default classes:
-  - `/Script/EnhancedInput.EnhancedPlayerInput`
-  - `/Script/EnhancedInput.EnhancedInputComponent`
-- Existing input assets are still under `Content/ThirdPerson/Input`.
-- Existing climber rig folder: `Content/Characters/Climber/Rigs`.
+- Project base: ThirdPerson template converted to a C++ project.
+- Runtime module exists at `Source/Climb`.
+- Current C++ framework includes:
+  - `AClimbingCharacter`
+  - `UClimbingMovementComponent`
+  - `UClimbingHoldQueryComponent`
+  - `UClimbingSolver`
+  - `UClimbingAnimInstance`
+- Enhanced Input is the required input system.
+- Climbing input assets exist for center-of-mass movement, limb probe movement, left grip, and right grip.
+- Climbing assets are organized under `Content/Climb`, including character Blueprints, input assets, environment hold Blueprint, and climbing Anim Blueprint.
+- Base framework Phase 0-6 is complete and documented in `docs/TEST_RECORDS.md`.
 
 ## Target Architecture
 
@@ -25,9 +29,9 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
 - Control Rig solves final FBIK presentation.
 - `AClimbingCharacter` owns state coordination, not all implementation details.
 - `UClimbingMovementComponent` owns climbing movement.
-- Trace logic belongs in a component or query library.
+- Trace logic belongs in `UClimbingHoldQueryComponent` or another query-only module.
 - `UClimbingSolver` owns pure math.
-- `UAnimInstance` bridges C++ outputs to Control Rig variables.
+- `UClimbingAnimInstance` bridges finalized C++ outputs to animation / Control Rig variables.
 
 ## Core Mechanics To Preserve
 
@@ -42,17 +46,16 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
   - Hand movement decreases pelvis wall distance.
   - Foot movement increases pelvis wall distance.
 
-## Initial Implementation Priority
+## Current Implementation Priority
 
-1. Add C++ module and folder skeleton.
-2. Add `AClimbingCharacter`.
-3. Add `UClimbingMovementComponent`.
-4. Define Enhanced Input assets and C++ bindings for CoM movement, limb probe, and grip triggers.
-5. Add Sphere Trace hold query outside the character class.
-6. Define `FLimbState`.
-7. Add minimum `UClimbingSolver` math interface.
-8. Add an animation bridge placeholder for future Control Rig variables.
+The project is now entering Playable Loop 1. Use `docs/PLAYABLE_LOOP_1_PLAN.md` as the active implementation plan.
+
+1. Add real wall attachment constraints after a valid hand grip.
+2. Add center-of-mass target offset driven by left stick.
+3. Add right-stick limb probe debug targeting.
+4. Support basic two-hand transfer between holds.
+5. Expose Body Tension and stability debug values using `UClimbingSolver`.
 
 ## Gate Policy
 
-Use `docs/GATES.md` as the authoritative acceptance policy. Use `docs/IMPLEMENTATION_PLAN.md` as the staged execution plan. Do not mark a phase complete unless its mapped gate passes or the blocker is explicitly recorded.
+Use `docs/GATES.md` as the authoritative acceptance policy. Use `docs/IMPLEMENTATION_PLAN.md` for the completed base framework plan and `docs/PLAYABLE_LOOP_1_PLAN.md` for the active playable loop plan. Do not mark a phase complete unless its mapped gate passes or the blocker is explicitly recorded.

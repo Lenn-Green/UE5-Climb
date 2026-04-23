@@ -223,3 +223,37 @@ Failure handling:
 
 - Move gameplay decisions back into C++.
 - Narrow the bridge to data transfer and presentation state.
+
+## G7 Playable Climbing Loop Gate
+
+Purpose: Ensure the first playable climbing loop is real gameplay behavior, not only state variables or debug-only plumbing.
+
+Pass criteria:
+
+- A valid hand grip attaches the character to a tagged climbing hold and prevents normal falling while at least one hand remains locked.
+- Releasing the final locked hand returns the character to falling.
+- Left-stick center-of-mass input changes an inspectable wall-plane target while climbing.
+- Right-stick limb probe input can select nearby hold candidates without moving trace ownership into the character.
+- Left and right hands can lock, release, and transfer independently.
+- Body Tension and stability debug values are finite and reflect CoM offset from support contacts.
+- Animation bridge values remain consistent with C++ limb and debug state.
+
+Forbidden:
+
+- Treating `Climbing` state as complete while the movement component still allows normal falling.
+- Putting Sphere Trace filtering, solver math, or gameplay authority into `UClimbingAnimInstance` or Control Rig.
+- Dropping the character from Body Tension thresholds before the debug model is validated.
+- Merging advanced mechanics such as Dyno, resonance swing, stamina, or footwork into Playable Loop 1.
+
+Verification:
+
+- Build `ClimbEditor Win64 Development`.
+- Run solver automation after Body Tension is integrated.
+- PIE test a tagged hold, an untagged wall, one-hand grip, two-hand grip, hand transfer, final release, CoM movement, and limb probing.
+- Inspect code ownership for movement, trace, solver, and animation bridge boundaries.
+
+Failure handling:
+
+- Fix movement attachment before adding more probe or solver behavior.
+- Fix trace ownership before tuning candidate selection.
+- Record any manual test blocker in `docs/TEST_RECORDS.md` before moving to the next stage.
