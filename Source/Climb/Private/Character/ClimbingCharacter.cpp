@@ -45,6 +45,16 @@ void AClimbingCharacter::EnterClimbing()
 	SetClimbingState(EClimbingState::Climbing);
 }
 
+void AClimbingCharacter::EnterClimbingWithAttachment(const FClimbingAttachmentFrame& AttachmentFrame)
+{
+	if (UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent())
+	{
+		ClimbingMovement->StartClimbingMovement(AttachmentFrame);
+	}
+
+	SetClimbingState(EClimbingState::Climbing);
+}
+
 void AClimbingCharacter::ExitClimbing()
 {
 	if (UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent())
@@ -260,7 +270,7 @@ void AClimbingCharacter::TryLockHand(EClimbingLimb Limb)
 
 	ApplyHoldCandidateToLimb(Limb, Candidate);
 	UpdateHandLoadPercentages();
-	EnterClimbing();
+	EnterClimbingWithAttachment(BuildAttachmentFrameFromLockedHands());
 }
 
 void AClimbingCharacter::ReleaseHand(EClimbingLimb Limb)
@@ -337,6 +347,62 @@ void AClimbingCharacter::ClearLimb(EClimbingLimb Limb)
 	const EClimbingLimb LimbId = LimbState.Limb;
 	LimbState = FLimbState();
 	LimbState.Limb = LimbId;
+}
+
+FClimbingAttachmentFrame AClimbingCharacter::BuildAttachmentFrameFromLockedHands() const
+{
+	FClimbingAttachmentFrame AttachmentFrame;
+
+	int32 LockedHandCount = 0;
+	if (LeftHandState.bIsLocked)
+	{
+		AttachmentFrame.AnchorLocation += LeftHandState.ContactLocation;
+		AttachmentFrame.WallNormal += LeftHandState.ContactNormal.GetSafeNormal();
+		++LockedHandCount;
+	}
+
+	if (RightHandState.bIsLocked)
+	{
+		AttachmentFrame.AnchorLocation += RightHandState.ContactLocation;
+		AttachmentFrame.WallNormal += RightHandState.ContactNormal.GetSafeNormal();
+		++LockedHandCount;
+	}
+
+	if (LockedHandCount == 0)
+	{
+		return AttachmentFrame;
+	}
+
+	AttachmentFrame.bIsValid = true;
+	AttachmentFrame.AnchorLocation /= LockedHandCount;
+	AttachmentFrame.ContactLocation = AttachmentFrame.AnchorLocation;
+	AttachmentFrame.WallNormal = AttachmentFrame.WallNormal.GetSafeNormal();
+	if (AttachmentFrame.WallNormal.IsNearlyZero())
+	{
+		AttachmentFrame.WallNormal = -GetActorForwardVector();
+	}
+
+	FillWallAxes(AttachmentFrame);
+	return AttachmentFrame;
+}
+
+void AClimbingCharacter::FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame)
+{
+	const FVector SafeWallNormal = AttachmentFrame.WallNormal.GetSafeNormal();
+	AttachmentFrame.WallNormal = SafeWallNormal.IsNearlyZero() ? FVector::ForwardVector : SafeWallNormal;
+
+	// The wall plane axes are built by crossing world up with the wall normal, then deriving wall up from that tangent.
+	AttachmentFrame.WallRight = FVector::CrossProduct(FVector::UpVector, AttachmentFrame.WallNormal).GetSafeNormal();
+	if (AttachmentFrame.WallRight.IsNearlyZero())
+	{
+		AttachmentFrame.WallRight = FVector::RightVector;
+	}
+
+	AttachmentFrame.WallUp = FVector::CrossProduct(AttachmentFrame.WallNormal, AttachmentFrame.WallRight).GetSafeNormal();
+	if (AttachmentFrame.WallUp.IsNearlyZero())
+	{
+		AttachmentFrame.WallUp = FVector::UpVector;
+	}
 }
 
 void AClimbingCharacter::SetClimbingState(EClimbingState NewState)

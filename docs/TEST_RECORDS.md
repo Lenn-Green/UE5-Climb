@@ -128,3 +128,33 @@ Known risks:
 
 - `PelvisOffset` is currently a zero placeholder until the procedural Z-axis policy is implemented.
 - The bridge exposes target data only; actual FBIK / Control Rig consumption still needs a future asset pass.
+
+## Playable Loop 1 - Stage A - Wall Attachment Constraint
+
+Date: 2026-04-23
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`, `G3`, `G4`, `G7`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding `FClimbingAttachmentFrame` and movement attachment constraints.
+- Static inspection confirmed movement attachment and target correction live in `UClimbingMovementComponent`.
+- Static inspection confirmed `AClimbingCharacter` still delegates hold query to `UClimbingHoldQueryComponent` and does not own Sweep / Trace implementation.
+
+Manual checks pending:
+
+- In PIE, grab a tagged `ClimbingHold` with L2 and confirm the character does not fall while the left hand remains locked.
+- Repeat with R2 and confirm the right hand can attach independently.
+- Try an untagged wall and confirm the character does not enter climbing.
+- Release the final locked hand and confirm the character enters Falling and drops.
+
+Skipped checks:
+
+- No automated gameplay movement test exists yet for climbing attachment.
+
+Known risks:
+
+- Attachment target currently uses locked hand contact points and wall normals directly; final body spacing will need tuning once CoM and animation offsets are active.
+- The Blueprint-exposed attachment entry point is named `StartClimbingMovementWithAttachment` because Unreal Header Tool does not allow two reflected `StartClimbingMovement` overloads.

@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "Data/ClimbingHoldTypes.h"
 #include "Data/ClimbingLimbTypes.h"
+#include "Data/ClimbingMovementTypes.h"
 #include "Data/ClimbingTypes.h"
 #include "ClimbingCharacter.generated.h"
 
@@ -23,6 +24,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category="Climbing|State")
 	void EnterClimbing();
+
+	UFUNCTION(BlueprintCallable, Category="Climbing|State")
+	void EnterClimbingWithAttachment(const FClimbingAttachmentFrame& AttachmentFrame);
 
 	UFUNCTION(BlueprintCallable, Category="Climbing|State")
 	void ExitClimbing();
@@ -146,5 +150,7 @@ private:
 	const FLimbState& GetLimbState(EClimbingLimb Limb) const;
 	void ApplyHoldCandidateToLimb(EClimbingLimb Limb, const FClimbingHoldCandidate& Candidate);
 	void ClearLimb(EClimbingLimb Limb);
+	FClimbingAttachmentFrame BuildAttachmentFrameFromLockedHands() const;
+	static void FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame);
 	void SetClimbingState(EClimbingState NewState);
 };
