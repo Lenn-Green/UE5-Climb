@@ -320,7 +320,7 @@ Known risks:
 
 Date: 2026-04-27
 
-Status: command-verified
+Status: passed
 
 Gates checked: `G0`, `G1`, `G6`
 
@@ -329,13 +329,13 @@ Command verification:
 - `ClimbEditor Win64 Development` build passed after converting `PelvisOffset` and limb targets in `UClimbingAnimInstance` from world space to skeletal mesh component space.
 - Static inspection confirmed the space conversion remains inside the animation bridge and does not move gameplay authority into Control Rig.
 
-Manual checks in progress:
+Manual checks:
 
 - `CR_ClimbingBody` asset was created.
 - `ABP_ClimbingCharacter` was wired to the Control Rig node.
 - Pelvis offset and hand target values were confirmed to be present before the space fix.
+- After the component-space conversion, the character no longer gets pulled far away when FBIK hand targets are active.
 
 Known risks:
 
-- FBIK behavior still depends on the in-editor rig graph setup and has not yet been fully revalidated after the space conversion.
-- There is a local asset move/delete state around climbing character rig assets that must be reviewed before finalizing the next Control Rig step.
+- FBIK behavior still depends on the in-editor rig graph setup and has not yet been tuned beyond the initial hand/pelvis verification.
