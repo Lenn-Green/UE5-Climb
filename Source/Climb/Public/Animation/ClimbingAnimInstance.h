@@ -7,6 +7,7 @@
 #include "ClimbingAnimInstance.generated.h"
 
 class AClimbingCharacter;
+class USkeletalMeshComponent;
 
 USTRUCT(BlueprintType)
 struct CLIMB_API FClimbingLimbAnimTarget
@@ -119,7 +120,7 @@ protected:
 private:
 	void ResolveClimbingCharacter();
 	void SnapshotClimbingData();
-	static FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState);
+	static FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent);
 	void UpdateControlRigTargets();
 	void ResetClimbingData();
 };

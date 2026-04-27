@@ -1,6 +1,7 @@
 #include "Animation/ClimbingAnimInstance.h"
 
 #include "Character/ClimbingCharacter.h"
+#include "Components/SkeletalMeshComponent.h"
 
 void UClimbingAnimInstance::NativeInitializeAnimation()
 {
@@ -49,25 +50,40 @@ void UClimbingAnimInstance::SnapshotClimbingData()
 	ActiveProbeLimb = ClimbingCharacter->GetActiveProbeLimb();
 	CenterOfMassInput = ClimbingCharacter->GetClimbCenterOfMassInput();
 	LimbProbeInput = ClimbingCharacter->GetClimbLimbProbeInput();
-	PelvisOffset = ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset;
+	const USkeletalMeshComponent* SkeletalMeshComponent = GetSkelMeshComponent();
+	PelvisOffset = SkeletalMeshComponent
+		? SkeletalMeshComponent->GetComponentTransform().InverseTransformVectorNoScale(ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset)
+		: ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset;
 
-	LeftHandTarget = MakeAnimTarget(ClimbingCharacter->GetLeftHandState());
-	RightHandTarget = MakeAnimTarget(ClimbingCharacter->GetRightHandState());
-	LeftFootTarget = MakeAnimTarget(ClimbingCharacter->GetLeftFootState());
-	RightFootTarget = MakeAnimTarget(ClimbingCharacter->GetRightFootState());
+	LeftHandTarget = MakeAnimTarget(ClimbingCharacter->GetLeftHandState(), SkeletalMeshComponent);
+	RightHandTarget = MakeAnimTarget(ClimbingCharacter->GetRightHandState(), SkeletalMeshComponent);
+	LeftFootTarget = MakeAnimTarget(ClimbingCharacter->GetLeftFootState(), SkeletalMeshComponent);
+	RightFootTarget = MakeAnimTarget(ClimbingCharacter->GetRightFootState(), SkeletalMeshComponent);
 	UpdateControlRigTargets();
 }
 
-FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& LimbState)
+FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent)
 {
 	FClimbingLimbAnimTarget Target;
 	Target.Limb = LimbState.Limb;
 	Target.bHasTarget = LimbState.bHasValidContact;
 	Target.bIsLocked = LimbState.bIsLocked;
-	Target.TargetLocation = LimbState.ContactLocation;
-	Target.TargetNormal = LimbState.ContactNormal;
-	Target.TargetRotation = LimbState.ContactRotation;
 	Target.LoadPercent = LimbState.LoadPercent;
+
+	if (!SkeletalMeshComponent)
+	{
+		Target.TargetLocation = LimbState.ContactLocation;
+		Target.TargetNormal = LimbState.ContactNormal;
+		Target.TargetRotation = LimbState.ContactRotation;
+		return Target;
+	}
+
+	const FTransform ComponentTransform = SkeletalMeshComponent->GetComponentTransform();
+	Target.TargetLocation = ComponentTransform.InverseTransformPosition(LimbState.ContactLocation);
+	Target.TargetNormal = ComponentTransform.InverseTransformVectorNoScale(LimbState.ContactNormal).GetSafeNormal();
+
+	const FQuat ComponentRelativeRotation = ComponentTransform.GetRotation().Inverse() * LimbState.ContactRotation.Quaternion();
+	Target.TargetRotation = ComponentRelativeRotation.Rotator();
 	return Target;
 }
 

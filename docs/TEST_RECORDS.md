@@ -315,3 +315,27 @@ Known risks:
 
 - The bridge contract is now explicit, but the actual Control Rig asset and FBIK graph are still unimplemented.
 - `ControlRigTargets` currently mirrors animation-facing values; if future rig needs local-space targets, that conversion still needs to be designed.
+
+## Control Rig Target Space Fix
+
+Date: 2026-04-27
+
+Status: command-verified
+
+Gates checked: `G0`, `G1`, `G6`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after converting `PelvisOffset` and limb targets in `UClimbingAnimInstance` from world space to skeletal mesh component space.
+- Static inspection confirmed the space conversion remains inside the animation bridge and does not move gameplay authority into Control Rig.
+
+Manual checks in progress:
+
+- `CR_ClimbingBody` asset was created.
+- `ABP_ClimbingCharacter` was wired to the Control Rig node.
+- Pelvis offset and hand target values were confirmed to be present before the space fix.
+
+Known risks:
+
+- FBIK behavior still depends on the in-editor rig graph setup and has not yet been fully revalidated after the space conversion.
+- There is a local asset move/delete state around climbing character rig assets that must be reviewed before finalizing the next Control Rig step.
