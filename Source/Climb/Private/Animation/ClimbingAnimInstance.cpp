@@ -57,6 +57,8 @@ void UClimbingAnimInstance::SnapshotClimbingData()
 
 	LeftHandTarget = MakeAnimTarget(ClimbingCharacter->GetLeftHandState(), SkeletalMeshComponent);
 	RightHandTarget = MakeAnimTarget(ClimbingCharacter->GetRightHandState(), SkeletalMeshComponent);
+	LeftHandExplorationTarget = MakeExplorationTarget(EClimbingLimb::LeftHand, SkeletalMeshComponent);
+	RightHandExplorationTarget = MakeExplorationTarget(EClimbingLimb::RightHand, SkeletalMeshComponent);
 	LeftFootTarget = MakeAnimTarget(ClimbingCharacter->GetLeftFootState(), SkeletalMeshComponent);
 	RightFootTarget = MakeAnimTarget(ClimbingCharacter->GetRightFootState(), SkeletalMeshComponent);
 	UpdateControlRigTargets();
@@ -87,6 +89,49 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& 
 	return Target;
 }
 
+FClimbingLimbAnimTarget UClimbingAnimInstance::MakeExplorationTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const
+{
+	FClimbingLimbAnimTarget Target;
+	Target.Limb = Limb;
+
+	if (!ClimbingCharacter)
+	{
+		return Target;
+	}
+
+	const FClimbingDebugState DebugState = ClimbingCharacter->GetClimbingDebugState();
+	if (!DebugState.bHasActiveExplorationTarget || ActiveProbeLimb != Limb)
+	{
+		return Target;
+	}
+
+	const FLimbState LimbState =
+		(Limb == EClimbingLimb::LeftHand) ? ClimbingCharacter->GetLeftHandState() :
+		(Limb == EClimbingLimb::RightHand) ? ClimbingCharacter->GetRightHandState() :
+		FLimbState();
+	if (LimbState.bIsLocked)
+	{
+		return Target;
+	}
+
+	Target.bHasTarget = true;
+	Target.bIsLocked = false;
+
+	if (!SkeletalMeshComponent)
+	{
+		Target.TargetLocation = DebugState.ActiveExplorationTargetLocation;
+		Target.TargetNormal = DebugState.ActiveExplorationTargetNormal;
+		Target.TargetRotation = DebugState.ActiveExplorationTargetNormal.ToOrientationRotator();
+		return Target;
+	}
+
+	const FTransform ComponentTransform = SkeletalMeshComponent->GetComponentTransform();
+	Target.TargetLocation = ComponentTransform.InverseTransformPosition(DebugState.ActiveExplorationTargetLocation);
+	Target.TargetNormal = ComponentTransform.InverseTransformVectorNoScale(DebugState.ActiveExplorationTargetNormal).GetSafeNormal();
+	Target.TargetRotation = Target.TargetNormal.ToOrientationRotator();
+	return Target;
+}
+
 void UClimbingAnimInstance::UpdateControlRigTargets()
 {
 	ControlRigTargets.bIsClimbing = bIsClimbing;
@@ -94,6 +139,8 @@ void UClimbingAnimInstance::UpdateControlRigTargets()
 	ControlRigTargets.PelvisOffset = PelvisOffset;
 	ControlRigTargets.LeftHandTarget = LeftHandTarget;
 	ControlRigTargets.RightHandTarget = RightHandTarget;
+	ControlRigTargets.LeftHandExplorationTarget = LeftHandExplorationTarget;
+	ControlRigTargets.RightHandExplorationTarget = RightHandExplorationTarget;
 	ControlRigTargets.LeftFootTarget = LeftFootTarget;
 	ControlRigTargets.RightFootTarget = RightFootTarget;
 }
@@ -112,6 +159,12 @@ void UClimbingAnimInstance::ResetClimbingData()
 
 	RightHandTarget = FClimbingLimbAnimTarget();
 	RightHandTarget.Limb = EClimbingLimb::RightHand;
+
+	LeftHandExplorationTarget = FClimbingLimbAnimTarget();
+	LeftHandExplorationTarget.Limb = EClimbingLimb::LeftHand;
+
+	RightHandExplorationTarget = FClimbingLimbAnimTarget();
+	RightHandExplorationTarget.Limb = EClimbingLimb::RightHand;
 
 	LeftFootTarget = FClimbingLimbAnimTarget();
 	LeftFootTarget.Limb = EClimbingLimb::LeftFoot;

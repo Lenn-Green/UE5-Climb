@@ -613,6 +613,18 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 	}
 
 	UpdateLimbProbeCandidate(AttachmentFrame);
+
+	if ((ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand) && !GetLimbState(ActiveProbeLimb).bIsLocked)
+	{
+		ClimbingDebugState.bHasActiveExplorationTarget = true;
+		ClimbingDebugState.ActiveExplorationTargetLocation = ClimbingDebugState.CurrentHoldCandidate.bIsValid
+			? ClimbingDebugState.CurrentHoldCandidate.Location
+			: ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * HandExplorationReach;
+		ClimbingDebugState.ActiveExplorationTargetNormal = ClimbingDebugState.CurrentHoldCandidate.bIsValid
+			? ClimbingDebugState.CurrentHoldCandidate.Normal
+			: (-AttachmentFrame.WallNormal).GetSafeNormal();
+	}
+
 	DrawClimbingDebugState();
 }
 

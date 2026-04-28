@@ -57,6 +57,12 @@ struct CLIMB_API FClimbingControlRigTargets
 	FClimbingLimbAnimTarget RightHandTarget;
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget LeftHandExplorationTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget RightHandExplorationTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget LeftFootTarget;
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
@@ -107,13 +113,20 @@ protected:
 	FClimbingLimbAnimTarget RightHandTarget;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget LeftHandExplorationTarget;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget RightHandExplorationTarget;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget LeftFootTarget;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget RightFootTarget;
 
 	// Suggested Control Rig variable contract:
-	// PelvisOffset, LeftHandTarget, RightHandTarget, LeftFootTarget, RightFootTarget, ActiveProbeLimb.
+	// PelvisOffset, LeftHandTarget, RightHandTarget, LeftHandExplorationTarget,
+	// RightHandExplorationTarget, LeftFootTarget, RightFootTarget, ActiveProbeLimb.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingControlRigTargets ControlRigTargets;
 
@@ -121,6 +134,7 @@ private:
 	void ResolveClimbingCharacter();
 	void SnapshotClimbingData();
 	static FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent);
+	FClimbingLimbAnimTarget MakeExplorationTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
 	void UpdateControlRigTargets();
 	void ResetClimbingData();
 };

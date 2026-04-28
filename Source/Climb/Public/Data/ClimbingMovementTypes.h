@@ -51,6 +51,15 @@ struct CLIMB_API FClimbingDebugState
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
 	FClimbingHoldCandidate CurrentHoldCandidate;
 
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
+	bool bHasActiveExplorationTarget = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
+	FVector ActiveExplorationTargetLocation = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug")
+	FVector ActiveExplorationTargetNormal = FVector::UpVector;
+
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", ClampMax="1.0"))
 	float CurrentBodyTension = 0.0f;
 
