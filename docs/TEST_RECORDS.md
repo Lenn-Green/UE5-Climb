@@ -363,7 +363,7 @@ Manual checks:
 
 Skipped checks:
 
-- Feet effectors are not connected yet.
+- Feet effectors were intentionally left out of this hand-focused pass.
 - Hand rotation solving remains disabled in this pass.
 - No automated editor or animation test exists yet for FBIK behavior.
 
@@ -371,3 +371,33 @@ Known risks:
 
 - FBIK quality still depends on manual rig tuning inside `CR_ClimbingBody`; torso compression, elbow shape, and clavicle behavior may still need refinement.
 - The current pass proves stable hand targeting, but not final climbing pose quality.
+
+## Control Rig First-Pass Foot FBIK
+
+Date: 2026-04-28
+
+Status: passed
+
+Gates checked: `G0`, `G6`, `G7`
+
+Command verification:
+
+- No C++ code changes were required in this pass; foot validation remained inside the Control Rig asset layer.
+- Static inspection confirmed foot FBIK work stayed in `CR_ClimbingBody` and did not add gameplay state decisions into the rig.
+
+Manual checks:
+
+- Left and right foot effectors were connected in `CR_ClimbingBody`.
+- Manual in-editor validation confirmed the foot FBIK setup is triggerable at the rig level.
+- Foot effector hookup did not break the previously validated dual-hand FBIK stability.
+
+Skipped checks:
+
+- Foot gameplay lock/release flow is not implemented yet, so this pass did not verify runtime player-driven foot contact.
+- Foot rotation solving remains disabled in this pass.
+- No automated editor or animation test exists yet for foot FBIK behavior.
+
+Known risks:
+
+- Current validation proves rig-layer foot effector connectivity only, not final climbing-feel behavior.
+- Because gameplay foot targeting does not exist yet, runtime foot targets still need a future C++ input, probe, and limb-state pass.
