@@ -401,3 +401,36 @@ Known risks:
 
 - Current validation proves rig-layer foot effector connectivity only, not final climbing-feel behavior.
 - Because gameplay foot targeting does not exist yet, runtime foot targets still need a future C++ input, probe, and limb-state pass.
+
+## Foot Gameplay Data Chain
+
+Date: 2026-04-28
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding minimal foot gameplay bindings and limb-state flow.
+- Static inspection confirmed trace ownership remains in `UClimbingHoldQueryComponent`.
+- Static inspection confirmed Control Rig remains a presentation consumer; foot lock state still originates in `AClimbingCharacter`.
+
+Manual checks pending:
+
+- Assign `ClimbLeftFootGripAction` and `ClimbRightFootGripAction` on `BP_ClimbingCharacter`.
+- Add temporary Enhanced Input mappings for left and right foot grip actions.
+- In PIE while climbing, switch the active probe to a foot and confirm the probe origin now falls back to the corresponding limb socket instead of the pelvis/anchor center.
+- Trigger left and right foot grip separately and confirm `LeftFootState` / `RightFootState` become locked on valid tagged holds.
+- Confirm foot targets propagate into the existing AnimInstance / Control Rig bridge without breaking hand FBIK.
+- Confirm exiting climbing clears stale hand and foot locks instead of leaving FBIK pinned while falling.
+
+Skipped checks:
+
+- No automated gameplay test exists yet for player-driven foot lock and release flow.
+- Foot-only attachment is intentionally unsupported in this pass; movement attachment still depends on locked hands.
+
+Known risks:
+
+- Load distribution is now shared across locked hands and feet, but the movement attachment frame is still built from hands only.
+- Foot probe targeting still uses the existing wall-plane candidate model and may need later tuning for reachability and realistic stance.

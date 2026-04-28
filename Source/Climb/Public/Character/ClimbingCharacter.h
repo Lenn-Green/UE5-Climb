@@ -58,6 +58,12 @@ public:
 	UFUNCTION(BlueprintPure, Category="Climbing|Input")
 	float GetRightGripInput() const;
 
+	UFUNCTION(BlueprintPure, Category="Climbing|Input")
+	float GetLeftFootGripInput() const;
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Input")
+	float GetRightFootGripInput() const;
+
 	UFUNCTION(BlueprintPure, Category="Climbing|Limb")
 	FLimbState GetLeftHandState() const;
 
@@ -75,6 +81,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Debug")
 	FClimbingDebugState GetClimbingDebugState() const;
+
+	UFUNCTION(BlueprintCallable, Category="Climbing|Limb")
+	void TryLockFoot(EClimbingLimb FootLimb);
+
+	UFUNCTION(BlueprintCallable, Category="Climbing|Limb")
+	void ReleaseFoot(EClimbingLimb FootLimb);
 
 protected:
 	virtual void BeginPlay() override;
@@ -102,6 +114,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Input")
 	TObjectPtr<UInputAction> ClimbRightGripAction;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Input")
+	TObjectPtr<UInputAction> ClimbLeftFootGripAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Input")
+	TObjectPtr<UInputAction> ClimbRightFootGripAction;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
 	FVector2D ClimbCenterOfMassInput = FVector2D::ZeroVector;
 
@@ -113,6 +131,12 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
 	float RightGripInput = 0.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	float LeftFootGripInput = 0.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	float RightFootGripInput = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Grip", meta=(ClampMin="0.0", ClampMax="1.0"))
 	float GripPressedThreshold = 0.35f;
@@ -176,9 +200,14 @@ private:
 	void HandleClimbLeftGripCompleted(const FInputActionValue& Value);
 	void HandleClimbRightGrip(const FInputActionValue& Value);
 	void HandleClimbRightGripCompleted(const FInputActionValue& Value);
-	void TryLockHand(EClimbingLimb Limb);
-	void ReleaseHand(EClimbingLimb Limb);
+	void HandleClimbLeftFootGrip(const FInputActionValue& Value);
+	void HandleClimbLeftFootGripCompleted(const FInputActionValue& Value);
+	void HandleClimbRightFootGrip(const FInputActionValue& Value);
+	void HandleClimbRightFootGripCompleted(const FInputActionValue& Value);
+	void TryLockLimb(EClimbingLimb Limb);
+	void ReleaseLimb(EClimbingLimb Limb);
 	bool HasLockedHand() const;
+	bool HasLockedFoot() const;
 	void RefreshClimbingAttachment();
 	void UpdateHandLoadPercentages();
 	FLimbState& GetMutableLimbState(EClimbingLimb Limb);
@@ -190,6 +219,7 @@ private:
 	void UpdateClimbingDebugState(float DeltaSeconds);
 	void UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame);
 	FVector GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const;
+	FName GetLimbProbeSocketName(EClimbingLimb Limb) const;
 	void DrawClimbingDebugState() const;
 	void SetClimbingState(EClimbingState NewState);
 };
