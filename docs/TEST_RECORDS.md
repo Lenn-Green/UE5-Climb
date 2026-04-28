@@ -339,3 +339,35 @@ Manual checks:
 Known risks:
 
 - FBIK behavior still depends on the in-editor rig graph setup and has not yet been tuned beyond the initial hand/pelvis verification.
+
+## Control Rig First-Pass Hand FBIK
+
+Date: 2026-04-28
+
+Status: passed
+
+Gates checked: `G0`, `G6`, `G7`
+
+Command verification:
+
+- No C++ code changes were required in this pass; the existing component-space bridge remained the runtime source for hand and pelvis targets.
+- Static inspection confirmed the rig work stayed inside `CR_ClimbingBody` and did not move gameplay authority into Control Rig.
+
+Manual checks:
+
+- In `CR_ClimbingBody`, a first-pass FBIK graph was configured with pelvis offset followed by hand effectors.
+- Left-hand-only manual validation passed: locking the left hand pulled the left arm toward the target without pulling the whole mesh away from the capsule.
+- Right-hand-only manual validation passed with the same stability expectations.
+- Dual-hand manual validation passed: both hands could stay active together without the character being pulled far away.
+- Unlocking a hand returned that limb to the base pose influence rather than pinning it in space.
+
+Skipped checks:
+
+- Feet effectors are not connected yet.
+- Hand rotation solving remains disabled in this pass.
+- No automated editor or animation test exists yet for FBIK behavior.
+
+Known risks:
+
+- FBIK quality still depends on manual rig tuning inside `CR_ClimbingBody`; torso compression, elbow shape, and clavicle behavior may still need refinement.
+- The current pass proves stable hand targeting, but not final climbing pose quality.
