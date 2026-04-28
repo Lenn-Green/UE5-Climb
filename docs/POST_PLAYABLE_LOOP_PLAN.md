@@ -9,10 +9,21 @@ Playable Loop 1 proved the first hand-driven climbing loop. The next stage is no
 Use this plan for any work that exceeds the original Loop 1 scope, including:
 
 - Control Rig FBIK asset tuning
-- Foot gameplay flow beyond placeholder data representation
 - Limb-specific probe refinement
 - Exploration IK for unlocked limbs
+- Foot gameplay flow beyond placeholder data representation
 - Future foot support or multi-limb support modeling
+
+## Execution Order
+
+The next phase should improve the arm / hand side first. Do not advance foot systems ahead of hand exploration and hand presentation polish unless the task is a narrow bug fix.
+
+Recommended order:
+
+1. Hand exploration and hand presentation
+2. Hand-side Control Rig stabilization
+3. Foot gameplay support
+4. Multi-limb support modeling
 
 ## Boundary Rules
 
@@ -21,32 +32,57 @@ Use this plan for any work that exceeds the original Loop 1 scope, including:
 - Do not add new gameplay mechanics here unless they are explicitly staged below.
 - Keep Control Rig as presentation. Gameplay authority remains in C++.
 
-## Stage P1 - Control Rig First-Pass Stabilization
+## Stage P1 - Hand Exploration And Hand Presentation
+
+Goal: make the active hand visibly search the wall before lock so probe input and arm motion finally match.
+
+Scope:
+
+- Add hand exploration target data in C++
+- Bridge unlocked active-hand exploration targets into AnimInstance / Control Rig
+- Make the active unlocked hand follow probe motion before grip lock
+- Keep lock transition readable when switching from exploration target to locked contact target
+
+Out of scope:
+
+- Foot exploration IK
+- Full-body authored climbing animation
+- Attachment authority changes
+
+Acceptance:
+
+- Active unlocked left or right hand visibly follows probe motion
+- Locking a hold transitions cleanly from exploration target to locked target
+- Hand exploration does not break the validated hand attachment loop
+
+Mapped gates: `G0`, `G4`, `G6`, `G7`
+
+## Stage P2 - Control Rig Hand Stabilization
 
 Goal: make the current `CR_ClimbingBody` usable and repeatable without changing gameplay authority.
 
 Scope:
 
-- Stabilize pelvis, hand, and foot FBIK hookup
+- Stabilize pelvis and hand FBIK hookup
 - Standardize recommended rig parameters
-- Keep locked-hand and locked-foot targets readable in animation
+- Keep locked-hand targets readable in animation
 - Avoid mesh pull-away, limb pinning, and broken unlock behavior
 
 Out of scope:
 
-- Exploration IK
 - Final limb rotation polish
+- Foot gameplay support
 - Support polygon gameplay
 
 Acceptance:
 
-- Existing limb targets remain stable under FBIK
+- Existing hand targets remain stable under FBIK
 - Unlocking a limb returns it to base pose influence
-- Foot FBIK does not break validated hand behavior
+- Hand-side rig behavior remains stable while exploration IK is active
 
 Mapped gates: `G0`, `G6`
 
-## Stage P2 - Foot Gameplay Support
+## Stage P3 - Foot Gameplay Support
 
 Goal: turn the current minimal foot data path into a deliberate gameplay system.
 
@@ -70,30 +106,6 @@ Acceptance:
 - Foot targets bridge cleanly into animation / Control Rig
 
 Mapped gates: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
-
-## Stage P3 - Exploration IK For Unlocked Limbs
-
-Goal: make the active, unlocked limb visually search the wall instead of only moving an invisible probe.
-
-Scope:
-
-- Add exploration target data from C++ for the active limb
-- Bridge exploration targets into AnimInstance / Control Rig
-- Make unlocked active hands use exploration IK before lock
-- Extend to feet only after hands are stable
-
-Out of scope:
-
-- Final authored climbing animation system
-- Full-body anticipation and reachability solver
-
-Acceptance:
-
-- Active unlocked hand follows probe movement visually
-- Locking a hold transitions from exploration target to locked contact target
-- Exploration behavior does not break current locked-limb stability
-
-Mapped gates: `G0`, `G4`, `G6`, `G7`
 
 ## Stage P4 - Multi-Limb Support Model
 
