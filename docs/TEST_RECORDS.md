@@ -406,9 +406,9 @@ Known risks:
 
 Date: 2026-04-28
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
+Gates checked: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
 
 Command verification:
 
@@ -416,7 +416,7 @@ Command verification:
 - Static inspection confirmed trace ownership remains in `UClimbingHoldQueryComponent`.
 - Static inspection confirmed Control Rig remains a presentation consumer; foot lock state still originates in `AClimbingCharacter`.
 
-Manual checks pending:
+Manual checks:
 
 - Assign `ClimbLeftFootGripAction` and `ClimbRightFootGripAction` on `BP_ClimbingCharacter`.
 - Add temporary Enhanced Input mappings for left and right foot grip actions.
@@ -425,6 +425,7 @@ Manual checks pending:
 - Trigger left and right foot grip separately and confirm `LeftFootState` / `RightFootState` become locked on valid tagged holds.
 - Confirm foot targets propagate into the existing AnimInstance / Control Rig bridge without breaking hand FBIK.
 - Confirm exiting climbing clears stale hand and foot locks instead of leaving FBIK pinned while falling.
+- Confirm the first foot grip attempt after switching away from a hand uses the foot's freshly updated probe candidate rather than the previous hand candidate.
 
 Skipped checks:
 

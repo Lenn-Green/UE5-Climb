@@ -354,11 +354,16 @@ void AClimbingCharacter::TryLockLimb(EClimbingLimb Limb)
 	ActiveProbeLimb = Limb;
 
 	FClimbingHoldCandidate Candidate;
-	if (IsClimbing() && ClimbingDebugState.CurrentHoldCandidate.bIsValid)
+	if (IsClimbing())
 	{
-		Candidate = ClimbingDebugState.CurrentHoldCandidate;
+		RefreshProbeCandidateForActiveLimb();
+		if (ClimbingDebugState.CurrentHoldCandidate.bIsValid)
+		{
+			Candidate = ClimbingDebugState.CurrentHoldCandidate;
+		}
 	}
-	else
+
+	if (!Candidate.bIsValid)
 	{
 		if (!HoldQueryComponent || !HoldQueryComponent->QueryBestHoldFromViewpoint(Candidate))
 		{
@@ -625,6 +630,19 @@ void AClimbingCharacter::UpdateLimbProbeCandidate(const FClimbingAttachmentFrame
 	}
 
 	ClimbingDebugState.CurrentHoldCandidate = FClimbingHoldCandidate();
+}
+
+bool AClimbingCharacter::RefreshProbeCandidateForActiveLimb()
+{
+	const UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent();
+	const FClimbingAttachmentFrame AttachmentFrame = ClimbingMovement ? ClimbingMovement->GetClimbingAttachmentFrame() : FClimbingAttachmentFrame();
+	if (!IsClimbing() || !AttachmentFrame.bIsValid)
+	{
+		return false;
+	}
+
+	UpdateLimbProbeCandidate(AttachmentFrame);
+	return ClimbingDebugState.CurrentHoldCandidate.bIsValid;
 }
 
 FVector AClimbingCharacter::GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const

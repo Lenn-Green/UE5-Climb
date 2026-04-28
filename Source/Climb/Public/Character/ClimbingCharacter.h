@@ -224,6 +224,7 @@ private:
 	static void FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame);
 	void UpdateClimbingDebugState(float DeltaSeconds);
 	void UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame);
+	bool RefreshProbeCandidateForActiveLimb();
 	FVector GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const;
 	FVector GetActiveLimbProbeTarget(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const;
 	FClimbingAttachmentFrame BuildProbeFrame(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const;
