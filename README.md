@@ -45,7 +45,8 @@
 - `MEMORY.md`：项目长期上下文、当前状态和阶段优先级。
 - `docs/GATES.md`：严格门禁系统，定义每个阶段通过标准。
 - `docs/IMPLEMENTATION_PLAN.md`：Phase 0-6 基础框架实施计划。
-- `docs/PLAYABLE_LOOP_1_PLAN.md`：下一阶段最小可玩攀爬闭环计划。
+- `docs/PLAYABLE_LOOP_1_PLAN.md`：Playable Loop 1 的原始范围与阶段计划，目前只剩 Stage E 的最终手动验收待关闭。
+- `docs/POST_PLAYABLE_LOOP_PLAN.md`：Playable Loop 1 之后的 Rig / 四肢扩展计划。
 - `docs/CONTROL_RIG_BRIDGE.md`：AnimInstance 到未来 Control Rig 资产的变量契约。
 - `docs/TEST_RECORDS.md`：阶段测试记录，包含命令验证、手动检查、跳过项和风险。
 - `.codex/skills/climb-ue5-hardcore-climbing/SKILL.md`：项目本地 Codex skill，用于后续自动加载本项目工作流。
