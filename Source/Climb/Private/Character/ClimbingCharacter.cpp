@@ -614,14 +614,7 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 void AClimbingCharacter::UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame)
 {
 	ClimbingDebugState.ProbeOrigin = GetActiveLimbProbeOrigin(AttachmentFrame);
-
-	const FVector ProbeOffset =
-		AttachmentFrame.WallRight.GetSafeNormal() * (ClimbLimbProbeInput.X * LimbProbeHorizontalRange) +
-		AttachmentFrame.WallUp.GetSafeNormal() * (ClimbLimbProbeInput.Y * LimbProbeVerticalRange);
-	const FVector ProbeTarget =
-		AttachmentFrame.AnchorLocation +
-		ProbeOffset -
-		AttachmentFrame.WallNormal.GetSafeNormal() * LimbProbeWallDepth;
+	const FVector ProbeTarget = GetActiveLimbProbeTarget(AttachmentFrame, ClimbingDebugState.ProbeOrigin);
 	ClimbingDebugState.ProbeDirection = (ProbeTarget - ClimbingDebugState.ProbeOrigin).GetSafeNormal();
 
 	FClimbingHoldCandidate Candidate;
@@ -644,31 +637,68 @@ FVector AClimbingCharacter::GetActiveLimbProbeOrigin(const FClimbingAttachmentFr
 
 	if (const USkeletalMeshComponent* MeshComponent = GetMesh())
 	{
-		const FName ProbeSocketName = GetLimbProbeSocketName(ActiveProbeLimb);
-		if (ProbeSocketName != NAME_None && MeshComponent->DoesSocketExist(ProbeSocketName))
+		const TArray<FName> ProbeSocketNames =
+			(ActiveProbeLimb == EClimbingLimb::LeftHand) ? TArray<FName>{TEXT("hand_probe_l"), TEXT("hand_l")} :
+			(ActiveProbeLimb == EClimbingLimb::RightHand) ? TArray<FName>{TEXT("hand_probe_r"), TEXT("hand_r")} :
+			(ActiveProbeLimb == EClimbingLimb::LeftFoot) ? TArray<FName>{TEXT("foot_probe_l"), TEXT("foot_l")} :
+			(ActiveProbeLimb == EClimbingLimb::RightFoot) ? TArray<FName>{TEXT("foot_probe_r"), TEXT("foot_r")} :
+			TArray<FName>{};
+
+		for (const FName ProbeSocketName : ProbeSocketNames)
 		{
-			return MeshComponent->GetSocketLocation(ProbeSocketName);
+			if (ProbeSocketName != NAME_None && MeshComponent->DoesSocketExist(ProbeSocketName))
+			{
+				return MeshComponent->GetSocketLocation(ProbeSocketName);
+			}
 		}
 	}
 
 	return AttachmentFrame.AnchorLocation + AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance;
 }
 
-FName AClimbingCharacter::GetLimbProbeSocketName(EClimbingLimb Limb) const
+FVector AClimbingCharacter::GetActiveLimbProbeTarget(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const
 {
-	switch (Limb)
+	const FClimbingAttachmentFrame ProbeFrame = BuildProbeFrame(AttachmentFrame, ProbeOrigin);
+	const FVector ProbeOffset =
+		ProbeFrame.WallRight.GetSafeNormal() * (ClimbLimbProbeInput.X * LimbProbeHorizontalRange) +
+		ProbeFrame.WallUp.GetSafeNormal() * (ClimbLimbProbeInput.Y * LimbProbeVerticalRange);
+	FVector ProbeCenter = ProbeFrame.AnchorLocation;
+
+	if (ActiveProbeLimb == EClimbingLimb::LeftFoot || ActiveProbeLimb == EClimbingLimb::RightFoot)
 	{
-	case EClimbingLimb::LeftHand:
-		return TEXT("hand_l");
-	case EClimbingLimb::RightHand:
-		return TEXT("hand_r");
-	case EClimbingLimb::LeftFoot:
-		return TEXT("foot_l");
-	case EClimbingLimb::RightFoot:
-		return TEXT("foot_r");
-	default:
-		return NAME_None;
+		// Foot probing should search from the foot's local stance area rather than the hand-built body anchor.
+		ProbeCenter += GetActorForwardVector().GetSafeNormal() * FootProbeForwardOffset;
+		ProbeCenter += ProbeFrame.WallUp.GetSafeNormal() * FootProbeVerticalBias;
 	}
+
+	return ProbeCenter + ProbeOffset - ProbeFrame.WallNormal.GetSafeNormal() * LimbProbeWallDepth;
+}
+
+FClimbingAttachmentFrame AClimbingCharacter::BuildProbeFrame(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const
+{
+	if (AttachmentFrame.bIsValid)
+	{
+		FClimbingAttachmentFrame ProbeFrame = AttachmentFrame;
+		if (ActiveProbeLimb == EClimbingLimb::LeftFoot || ActiveProbeLimb == EClimbingLimb::RightFoot)
+		{
+			ProbeFrame.AnchorLocation = ProbeOrigin;
+		}
+
+		return ProbeFrame;
+	}
+
+	FClimbingAttachmentFrame ProbeFrame;
+	ProbeFrame.bIsValid = true;
+	ProbeFrame.AnchorLocation = ProbeOrigin;
+	ProbeFrame.ContactLocation = ProbeOrigin;
+	ProbeFrame.WallNormal = -GetActorForwardVector().GetSafeNormal();
+	if (ProbeFrame.WallNormal.IsNearlyZero())
+	{
+		ProbeFrame.WallNormal = FVector::ForwardVector;
+	}
+
+	FillWallAxes(ProbeFrame);
+	return ProbeFrame;
 }
 
 void AClimbingCharacter::DrawClimbingDebugState() const

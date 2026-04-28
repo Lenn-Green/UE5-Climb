@@ -420,7 +420,8 @@ Manual checks pending:
 
 - Assign `ClimbLeftFootGripAction` and `ClimbRightFootGripAction` on `BP_ClimbingCharacter`.
 - Add temporary Enhanced Input mappings for left and right foot grip actions.
-- In PIE while climbing, switch the active probe to a foot and confirm the probe origin now falls back to the corresponding limb socket instead of the pelvis/anchor center.
+- In PIE while climbing, switch the active probe to a foot and confirm the probe origin falls back to the corresponding foot socket instead of the pelvis/anchor center.
+- Confirm the foot probe target area is centered around the active foot rather than the hand-built body anchor.
 - Trigger left and right foot grip separately and confirm `LeftFootState` / `RightFootState` become locked on valid tagged holds.
 - Confirm foot targets propagate into the existing AnimInstance / Control Rig bridge without breaking hand FBIK.
 - Confirm exiting climbing clears stale hand and foot locks instead of leaving FBIK pinned while falling.
@@ -433,4 +434,4 @@ Skipped checks:
 Known risks:
 
 - Load distribution is now shared across locked hands and feet, but the movement attachment frame is still built from hands only.
-- Foot probe targeting still uses the existing wall-plane candidate model and may need later tuning for reachability and realistic stance.
+- Foot probe now has a limb-centered target area, but it still uses the current wall-plane candidate model and may need later tuning for reachability and realistic stance.

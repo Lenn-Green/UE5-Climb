@@ -177,6 +177,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
 	float LimbProbeWallDepth = 35.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float FootProbeForwardOffset = 20.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
+	float FootProbeVerticalBias = 10.0f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
 	float StableOffsetThreshold = 75.0f;
 
@@ -219,7 +225,8 @@ private:
 	void UpdateClimbingDebugState(float DeltaSeconds);
 	void UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame);
 	FVector GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const;
-	FName GetLimbProbeSocketName(EClimbingLimb Limb) const;
+	FVector GetActiveLimbProbeTarget(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const;
+	FClimbingAttachmentFrame BuildProbeFrame(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const;
 	void DrawClimbingDebugState() const;
 	void SetClimbingState(EClimbingState NewState);
 };
