@@ -260,9 +260,9 @@ Known risks:
 
 Date: 2026-04-23
 
-Status: pending manual editor verification
+Status: passed
 
-Gates checked so far: `G0`, `G1`, `G4`, `G5`, `G6`, `G7`
+Gates checked: `G0`, `G1`, `G4`, `G5`, `G6`, `G7`
 
 Command verification:
 
@@ -276,7 +276,7 @@ Command verification:
 - Static inspection confirmed `AClimbingCharacter` still does not own Sweep / Trace implementation.
 - Static inspection confirmed `UClimbingAnimInstance` still does not perform trace, solver, movement, or gameplay state logic.
 
-Manual checks pending:
+Manual checks:
 
 - In PIE, lock two tagged holds with left and right hands.
 - Move the center-of-mass target with the left-stick substitute input.

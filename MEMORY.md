@@ -48,9 +48,7 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
 
 ## Current Implementation Priority
 
-Playable Loop 1 implementation is effectively complete except for the final manual editor verification of Stage E Body Tension debug behavior. Use `docs/PLAYABLE_LOOP_1_PLAN.md` only to finish that remaining sign-off work.
-
-After Playable Loop 1 is formally closed, use `docs/POST_PLAYABLE_LOOP_PLAN.md` for any further work on:
+Playable Loop 1 is complete and documented. Use `docs/POST_PLAYABLE_LOOP_PLAN.md` for all subsequent work on:
 
 1. Control Rig first-pass productionization
 2. Hand / foot probe refinement
@@ -59,4 +57,4 @@ After Playable Loop 1 is formally closed, use `docs/POST_PLAYABLE_LOOP_PLAN.md` 
 
 ## Gate Policy
 
-Use `docs/GATES.md` as the authoritative acceptance policy. Use `docs/IMPLEMENTATION_PLAN.md` for the completed base framework plan, `docs/PLAYABLE_LOOP_1_PLAN.md` to close the remaining Playable Loop 1 verification work, and `docs/POST_PLAYABLE_LOOP_PLAN.md` for all later Rig / limb expansion work. Do not mark a phase complete unless its mapped gate passes or the blocker is explicitly recorded.
+Use `docs/GATES.md` as the authoritative acceptance policy. Use `docs/IMPLEMENTATION_PLAN.md` for the completed base framework plan, `docs/PLAYABLE_LOOP_1_PLAN.md` as the closed record of the first climbing loop, and `docs/POST_PLAYABLE_LOOP_PLAN.md` for all later Rig / limb expansion work. Do not mark a phase complete unless its mapped gate passes or the blocker is explicitly recorded.

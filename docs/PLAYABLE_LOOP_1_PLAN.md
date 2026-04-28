@@ -6,7 +6,7 @@ This plan starts after the completed Phase 0-6 base framework. The goal is the f
 
 Stages A-D are passed and documented in `docs/TEST_RECORDS.md`.
 
-Stage E implementation and command verification are complete, but its final manual editor verification is still pending. Until that manual check is recorded as passed, Playable Loop 1 is not formally closed.
+Stage E implementation, command verification, and final manual editor verification are complete. Playable Loop 1 is now formally closed.
 
 Work such as Control Rig FBIK tuning, foot gameplay flow, probe refinement, or exploration IK is outside the original scope of this plan and must be tracked in `docs/POST_PLAYABLE_LOOP_PLAN.md` instead of being treated as additional Playable Loop 1 stages.
 
