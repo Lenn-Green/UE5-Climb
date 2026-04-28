@@ -450,12 +450,14 @@ Command verification:
 - `ClimbEditor Win64 Development` build passed after adding hand exploration target data and animation bridge fields.
 - Static inspection confirmed gameplay probe and candidate logic remain in `AClimbingCharacter`.
 - Static inspection confirmed the new exploration target data is still transferred through `UClimbingAnimInstance` rather than computed inside Control Rig.
+- Static inspection confirmed hand grip inputs still own lock / release, while the free hand now auto-becomes `ActiveProbeLimb` when exactly one hand is locked.
 
 Manual checks pending:
 
 - Confirm `ABP_ClimbingCharacter` can read `LeftHandExplorationTarget` and `RightHandExplorationTarget`.
 - In `CR_ClimbingBody`, wire the active unlocked hand to the matching exploration target with lower weight than a locked hand target.
-- In PIE, activate the left hand without locking a hold and move probe input.
+- In PIE, lock one hand and confirm the opposite free hand automatically becomes `ActiveProbeLimb` before any new grip press.
+- In PIE, move probe input while that free hand remains unlocked.
 - Confirm the unlocked active hand visibly follows the probe search area instead of staying fixed in the base pose.
 - Lock a valid hold and confirm the hand transitions from exploration target to locked contact target without a large snap or mesh instability.
 - Repeat for the right hand.
@@ -469,3 +471,4 @@ Known risks:
 
 - Exploration targets currently use candidate location when a valid hold exists and probe-forward fallback otherwise; that may still need feel tuning.
 - Until the rig asset is updated, the new bridge data exists but will not change visible arm behavior on its own.
+- Foot grip flow still sets `ActiveProbeLimb` directly on press; this hand-first auto-selection rule is intentionally limited to the one-hand-supported exploration case in `P1`.

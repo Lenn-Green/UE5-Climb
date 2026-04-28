@@ -381,6 +381,7 @@ void AClimbingCharacter::TryLockLimb(EClimbingLimb Limb)
 	ApplyHoldCandidateToLimb(Limb, Candidate);
 	UpdateHandLoadPercentages();
 	RefreshClimbingAttachment();
+	RefreshAutomaticActiveHand();
 }
 
 void AClimbingCharacter::ReleaseLimb(EClimbingLimb Limb)
@@ -389,6 +390,7 @@ void AClimbingCharacter::ReleaseLimb(EClimbingLimb Limb)
 	ClearLimb(Limb);
 	ActiveProbeLimb = Limb;
 	UpdateHandLoadPercentages();
+	RefreshAutomaticActiveHand();
 
 	if (bWasLocked && !HasLockedHand() && IsClimbing())
 	{
@@ -503,6 +505,18 @@ void AClimbingCharacter::ClearLimb(EClimbingLimb Limb)
 	const EClimbingLimb LimbId = LimbState.Limb;
 	LimbState = FLimbState();
 	LimbState.Limb = LimbId;
+}
+
+void AClimbingCharacter::RefreshAutomaticActiveHand()
+{
+	if (LeftHandState.bIsLocked == RightHandState.bIsLocked)
+	{
+		return;
+	}
+
+	// With exactly one supporting hand locked, the free hand becomes the active probe limb.
+	// This keeps probe input and exploration IK attached to the hand that is actually searching.
+	ActiveProbeLimb = LeftHandState.bIsLocked ? EClimbingLimb::RightHand : EClimbingLimb::LeftHand;
 }
 
 FClimbingAttachmentFrame AClimbingCharacter::BuildAttachmentFrameFromLockedHands() const

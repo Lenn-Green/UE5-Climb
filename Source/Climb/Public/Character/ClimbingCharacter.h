@@ -223,6 +223,7 @@ private:
 	const FLimbState& GetLimbState(EClimbingLimb Limb) const;
 	void ApplyHoldCandidateToLimb(EClimbingLimb Limb, const FClimbingHoldCandidate& Candidate);
 	void ClearLimb(EClimbingLimb Limb);
+	void RefreshAutomaticActiveHand();
 	FClimbingAttachmentFrame BuildAttachmentFrameFromLockedHands() const;
 	static void FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame);
 	void UpdateClimbingDebugState(float DeltaSeconds);
