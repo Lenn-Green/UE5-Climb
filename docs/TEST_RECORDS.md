@@ -545,3 +545,30 @@ Known risks:
 - The movement attachment frame remains hand-driven by design in `P3`.
 - Existing foot logic was implemented before `P3` was formally opened, so this phase still needs explicit revalidation under the current plan boundary.
 - With one hand plus two feet locked, the remaining hand does not yet regain a fully natural support-aware exploration / lock workflow. That limitation is explicitly deferred to `P4 - Multi-Limb Support Model`.
+
+## P4 - Multi-Limb Support Model
+
+Date: 2026-04-29
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G4`, `G5`, `G6`, `G7`
+
+Command verification:
+
+- `ClimbEditor Win64 Development` build passed after adding a mixed support frame for debug, probe, and exploration queries.
+- Static inspection confirmed movement attachment authority remains hand-driven in `RefreshClimbingAttachment()`.
+- Static inspection confirmed support-aware probing now uses locked hands and feet together through `BuildSupportFrameFromLockedLimbs(...)`.
+- Static inspection confirmed mixed-support stability debug now derives its support span from the widest locked contact pair instead of assuming hands only.
+- Added `docs/P4_MULTI_LIMB_SUPPORT_CHECKLIST.md` for phase-specific manual verification.
+
+Manual checks pending:
+
+- Lock `1 hand + 2 feet` and confirm the remaining free hand can explore and lock from a mixed support-aware frame.
+- Confirm the same workflow on the mirrored side.
+- Confirm mixed-support debug values remain finite and readable.
+
+Known risks:
+
+- Movement attachment is still hand-driven in this first `P4` pass, so releasing the final hand still exits climbing even if feet remain locked.
+- Mixed-support stability currently reuses the existing two-point solver by choosing the widest locked support pair; a real support polygon solver is still future work.

@@ -231,6 +231,7 @@ private:
 	void ClearLimb(EClimbingLimb Limb);
 	void RefreshAutomaticActiveHand();
 	FClimbingAttachmentFrame BuildAttachmentFrameFromLockedHands() const;
+	FClimbingAttachmentFrame BuildSupportFrameFromLockedLimbs(const FClimbingAttachmentFrame& FallbackAttachmentFrame) const;
 	static void FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame);
 	void UpdateClimbingDebugState(float DeltaSeconds);
 	void UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame);

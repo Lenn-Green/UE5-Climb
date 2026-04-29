@@ -556,6 +556,50 @@ FClimbingAttachmentFrame AClimbingCharacter::BuildAttachmentFrameFromLockedHands
 	return AttachmentFrame;
 }
 
+FClimbingAttachmentFrame AClimbingCharacter::BuildSupportFrameFromLockedLimbs(const FClimbingAttachmentFrame& FallbackAttachmentFrame) const
+{
+	FClimbingAttachmentFrame SupportFrame = FallbackAttachmentFrame;
+	FVector AccumulatedLocation = FVector::ZeroVector;
+	FVector AccumulatedNormal = FVector::ZeroVector;
+	int32 LockedSupportCount = 0;
+
+	const auto AccumulateLockedLimb = [&](const FLimbState& LimbState)
+	{
+		if (!LimbState.bIsLocked)
+		{
+			return;
+		}
+
+		AccumulatedLocation += LimbState.ContactLocation;
+		AccumulatedNormal += LimbState.ContactNormal.GetSafeNormal();
+		++LockedSupportCount;
+	};
+
+	AccumulateLockedLimb(LeftHandState);
+	AccumulateLockedLimb(RightHandState);
+	AccumulateLockedLimb(LeftFootState);
+	AccumulateLockedLimb(RightFootState);
+
+	if (LockedSupportCount == 0)
+	{
+		return FallbackAttachmentFrame;
+	}
+
+	SupportFrame.bIsValid = true;
+	SupportFrame.AnchorLocation = AccumulatedLocation / LockedSupportCount;
+	SupportFrame.ContactLocation = SupportFrame.AnchorLocation;
+	SupportFrame.WallNormal = AccumulatedNormal.GetSafeNormal();
+	if (SupportFrame.WallNormal.IsNearlyZero())
+	{
+		SupportFrame.WallNormal = FallbackAttachmentFrame.bIsValid
+			? FallbackAttachmentFrame.WallNormal.GetSafeNormal()
+			: (-GetActorForwardVector()).GetSafeNormal();
+	}
+
+	FillWallAxes(SupportFrame);
+	return SupportFrame;
+}
+
 void AClimbingCharacter::FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame)
 {
 	const FVector SafeWallNormal = AttachmentFrame.WallNormal.GetSafeNormal();
@@ -578,15 +622,16 @@ void AClimbingCharacter::FillWallAxes(FClimbingAttachmentFrame& AttachmentFrame)
 void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 {
 	const UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent();
-	const FClimbingAttachmentFrame AttachmentFrame = ClimbingMovement ? ClimbingMovement->GetClimbingAttachmentFrame() : FClimbingAttachmentFrame();
-	if (!IsClimbing() || !AttachmentFrame.bIsValid)
+	const FClimbingAttachmentFrame MovementAttachmentFrame = ClimbingMovement ? ClimbingMovement->GetClimbingAttachmentFrame() : FClimbingAttachmentFrame();
+	if (!IsClimbing() || !MovementAttachmentFrame.bIsValid)
 	{
 		ClimbingDebugState = FClimbingDebugState();
 		return;
 	}
 
-	const FVector WallRight = AttachmentFrame.WallRight.GetSafeNormal();
-	const FVector WallUp = AttachmentFrame.WallUp.GetSafeNormal();
+	const FClimbingAttachmentFrame SupportFrame = BuildSupportFrameFromLockedLimbs(MovementAttachmentFrame);
+	const FVector WallRight = SupportFrame.WallRight.GetSafeNormal();
+	const FVector WallUp = SupportFrame.WallUp.GetSafeNormal();
 	const FVector2D ClampedInput(
 		FMath::Clamp(ClimbCenterOfMassInput.X, -1.0f, 1.0f),
 		FMath::Clamp(ClimbCenterOfMassInput.Y, -1.0f, 1.0f));
@@ -596,25 +641,56 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 		WallRight * (ClampedInput.X * MaxCenterOfMassHorizontalOffset) +
 		WallUp * (ClampedInput.Y * MaxCenterOfMassVerticalOffset);
 	ClimbingDebugState.CenterOfMassTarget =
-		AttachmentFrame.AnchorLocation +
-		AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance +
+		SupportFrame.AnchorLocation +
+		SupportFrame.WallNormal.GetSafeNormal() * SupportFrame.TargetWallDistance +
 		ClimbingDebugState.CenterOfMassTargetOffset;
 
-	const bool bHasLeftHand = LeftHandState.bIsLocked;
-	const bool bHasRightHand = RightHandState.bIsLocked;
-	if (bHasLeftHand && bHasRightHand)
+	TArray<FVector, TInlineAllocator<4>> LockedSupportContacts;
+	const auto AddLockedSupportContact = [&](const FLimbState& LimbState)
 	{
+		if (LimbState.bIsLocked)
+		{
+			LockedSupportContacts.Add(LimbState.ContactLocation);
+		}
+	};
+
+	AddLockedSupportContact(LeftHandState);
+	AddLockedSupportContact(RightHandState);
+	AddLockedSupportContact(LeftFootState);
+	AddLockedSupportContact(RightFootState);
+
+	if (LockedSupportContacts.Num() >= 2)
+	{
+		// Multi-limb support is approximated as the widest contact pair so the existing two-point
+		// solver can reflect feet contributing to the current support span before a full polygon solver exists.
+		FVector SupportPointA = LockedSupportContacts[0];
+		FVector SupportPointB = LockedSupportContacts[1];
+		float MaxSupportSpanSquared = FVector::DistSquared(SupportPointA, SupportPointB);
+		for (int32 IndexA = 0; IndexA < LockedSupportContacts.Num(); ++IndexA)
+		{
+			for (int32 IndexB = IndexA + 1; IndexB < LockedSupportContacts.Num(); ++IndexB)
+			{
+				const float CurrentSpanSquared = FVector::DistSquared(LockedSupportContacts[IndexA], LockedSupportContacts[IndexB]);
+				if (CurrentSpanSquared > MaxSupportSpanSquared)
+				{
+					MaxSupportSpanSquared = CurrentSpanSquared;
+					SupportPointA = LockedSupportContacts[IndexA];
+					SupportPointB = LockedSupportContacts[IndexB];
+				}
+			}
+		}
+
 		const FClimbingStabilityResult Stability = UClimbingSolver::EstimateTwoPointStability(
 			ClimbingDebugState.CenterOfMassTarget,
-			LeftHandState.ContactLocation,
-			RightHandState.ContactLocation,
-			AttachmentFrame.WallNormal,
+			SupportPointA,
+			SupportPointB,
+			SupportFrame.WallNormal,
 			StableOffsetThreshold);
 
 		ClimbingDebugState.CurrentBodyTension = UClimbingSolver::EstimateBodyTension(
 			ClimbingDebugState.CenterOfMassTarget,
-			LeftHandState.ContactLocation,
-			RightHandState.ContactLocation,
+			SupportPointA,
+			SupportPointB,
 			MaxBodyTensionOffset);
 		ClimbingDebugState.StabilityPercent = Stability.StabilityPercent;
 		ClimbingDebugState.bIsPoseStable = Stability.bIsStable;
@@ -622,11 +698,11 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 	else
 	{
 		ClimbingDebugState.CurrentBodyTension = 0.0f;
-		ClimbingDebugState.StabilityPercent = HasLockedHand() ? 1.0f : 0.0f;
-		ClimbingDebugState.bIsPoseStable = HasLockedHand();
+		ClimbingDebugState.StabilityPercent = LockedSupportContacts.Num() == 1 ? 1.0f : 0.0f;
+		ClimbingDebugState.bIsPoseStable = LockedSupportContacts.Num() == 1;
 	}
 
-	UpdateLimbProbeCandidate(AttachmentFrame);
+	UpdateLimbProbeCandidate(SupportFrame);
 
 	if ((ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand) && !GetLimbState(ActiveProbeLimb).bIsLocked)
 	{
@@ -638,7 +714,7 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 			ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * HandExplorationReach;
 		ClimbingDebugState.ActiveExplorationTargetNormal = ClimbingDebugState.CurrentHoldCandidate.bIsValid
 			? ClimbingDebugState.CurrentHoldCandidate.Normal
-			: (-AttachmentFrame.WallNormal).GetSafeNormal();
+			: (-SupportFrame.WallNormal).GetSafeNormal();
 	}
 
 	DrawClimbingDebugState();
@@ -682,13 +758,13 @@ void AClimbingCharacter::UpdateLimbProbeCandidate(const FClimbingAttachmentFrame
 bool AClimbingCharacter::RefreshProbeCandidateForActiveLimb()
 {
 	const UClimbingMovementComponent* ClimbingMovement = GetClimbingMovementComponent();
-	const FClimbingAttachmentFrame AttachmentFrame = ClimbingMovement ? ClimbingMovement->GetClimbingAttachmentFrame() : FClimbingAttachmentFrame();
-	if (!IsClimbing() || !AttachmentFrame.bIsValid)
+	const FClimbingAttachmentFrame MovementAttachmentFrame = ClimbingMovement ? ClimbingMovement->GetClimbingAttachmentFrame() : FClimbingAttachmentFrame();
+	if (!IsClimbing() || !MovementAttachmentFrame.bIsValid)
 	{
 		return false;
 	}
 
-	UpdateLimbProbeCandidate(AttachmentFrame);
+	UpdateLimbProbeCandidate(BuildSupportFrameFromLockedLimbs(MovementAttachmentFrame));
 	return ClimbingDebugState.CurrentHoldCandidate.bIsValid;
 }
 

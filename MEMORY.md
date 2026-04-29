@@ -51,6 +51,7 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
 Playable Loop 1 is complete and documented. Use `docs/POST_PLAYABLE_LOOP_PLAN.md` for all subsequent work on:
 
 1. Foot support and future multi-limb support modeling
+2. Immediate `P4` focus: let free-limb probe / exploration use a mixed support frame built from locked hands and feet before changing movement attachment authority
 
 `P1 - Hand Exploration And Hand Presentation` is complete and recorded in `docs/TEST_RECORDS.md`.
 `P2 - Control Rig Hand Stabilization` is complete and recorded in `docs/TEST_RECORDS.md`.

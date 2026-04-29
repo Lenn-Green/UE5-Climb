@@ -138,6 +138,12 @@ Acceptance:
 
 Mapped gates: `G0`, `G4`, `G5`, `G6`, `G7`
 
+Current implementation order:
+
+1. Introduce a support-aware frame for debug, probe, and exploration that can average locked hands and feet.
+2. Keep movement attachment authority hand-driven until that first support-aware probe flow is validated.
+3. Revisit attachment ownership only after the mixed-support exploration workflow is stable.
+
 ## Documentation Rule
 
 Before implementing a new stage from this plan:
