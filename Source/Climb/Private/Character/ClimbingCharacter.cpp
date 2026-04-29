@@ -631,9 +631,11 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 	if ((ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand) && !GetLimbState(ActiveProbeLimb).bIsLocked)
 	{
 		ClimbingDebugState.bHasActiveExplorationTarget = true;
-		ClimbingDebugState.ActiveExplorationTargetLocation = ClimbingDebugState.CurrentHoldCandidate.bIsValid
-			? ClimbingDebugState.CurrentHoldCandidate.Location
-			: ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * HandExplorationReach;
+		// The exploration target should respond continuously to probe input rather than snapping
+		// to the current hold candidate. Candidate selection remains a lock hint; the hand reaches
+		// along the live probe ray so the player can visibly search before committing to a grab.
+		ClimbingDebugState.ActiveExplorationTargetLocation =
+			ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * HandExplorationReach;
 		ClimbingDebugState.ActiveExplorationTargetNormal = ClimbingDebugState.CurrentHoldCandidate.bIsValid
 			? ClimbingDebugState.CurrentHoldCandidate.Normal
 			: (-AttachmentFrame.WallNormal).GetSafeNormal();
