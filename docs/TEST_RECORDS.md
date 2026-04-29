@@ -514,7 +514,7 @@ Known risks:
 
 Date: 2026-04-29
 
-Status: pending manual editor verification
+Status: passed
 
 Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
 
@@ -526,15 +526,15 @@ Command verification:
   - `Control Rig First-Pass Foot FBIK`
   - `Foot Gameplay Data Chain`
 
-Manual checks pending:
+Manual checks:
 
-- Confirm left and right foot grip inputs still fire after the completed hand-side phases.
-- Confirm foot probe origin still uses the active foot region rather than the body center.
-- Confirm foot target area still behaves as foot-centered rather than hand-centered.
-- Confirm valid tagged holds lock for both feet.
-- Confirm invalid wall surfaces are rejected for both feet.
-- Confirm `LeftFootTarget` / `RightFootTarget` still bridge cleanly into animation / Control Rig.
-- Confirm release and climbing exit still clear stale foot state safely.
+- Confirmed left and right foot grip inputs still fire after the completed hand-side phases.
+- Confirmed foot probe origin still uses the active foot region rather than the body center.
+- Confirmed foot target area still behaves as foot-centered rather than hand-centered.
+- Confirmed valid tagged holds lock for both feet.
+- Confirmed invalid wall surfaces are rejected for both feet.
+- Confirmed `LeftFootTarget` / `RightFootTarget` still bridge cleanly into animation / Control Rig.
+- Confirmed release and climbing exit still clear stale foot state safely.
 
 Skipped checks:
 
@@ -544,3 +544,4 @@ Known risks:
 
 - The movement attachment frame remains hand-driven by design in `P3`.
 - Existing foot logic was implemented before `P3` was formally opened, so this phase still needs explicit revalidation under the current plan boundary.
+- With one hand plus two feet locked, the remaining hand does not yet regain a fully natural support-aware exploration / lock workflow. That limitation is explicitly deferred to `P4 - Multi-Limb Support Model`.

@@ -112,6 +112,8 @@ Acceptance:
 
 Mapped gates: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
 
+Status: passed and closed on 2026-04-29. Continue with `P4 - Multi-Limb Support Model`.
+
 ## Stage P4 - Multi-Limb Support Model
 
 Goal: begin treating feet as real support contributors instead of animation-only followers.
@@ -121,6 +123,7 @@ Scope:
 - Revisit load distribution
 - Decide when feet participate in attachment or stability models
 - Expand solver assumptions beyond hand-only support
+- Define how remaining free limbs continue exploration when hands and feet already share support
 
 Out of scope:
 
