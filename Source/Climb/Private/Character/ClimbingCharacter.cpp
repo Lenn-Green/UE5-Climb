@@ -283,70 +283,88 @@ void AClimbingCharacter::HandleClimbLimbProbeCompleted(const FInputActionValue& 
 
 void AClimbingCharacter::HandleClimbLeftGrip(const FInputActionValue& Value)
 {
-	const bool bWasPressed = LeftGripInput >= GripPressedThreshold;
-	LeftGripInput = Value.Get<float>();
-	const bool bIsPressed = LeftGripInput >= GripPressedThreshold;
-	if (!bWasPressed && bIsPressed)
-	{
-		TryLockLimb(EClimbingLimb::LeftHand);
-	}
+	UpdateLimbGripState(EClimbingLimb::LeftHand, Value.Get<float>(), LeftGripInput, LeftGripPressStartTime, bLeftGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbLeftGripCompleted(const FInputActionValue& Value)
 {
-	LeftGripInput = 0.0f;
-	ReleaseLimb(EClimbingLimb::LeftHand);
+	CompleteLimbGripState(EClimbingLimb::LeftHand, LeftGripInput, LeftGripPressStartTime, bLeftGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbRightGrip(const FInputActionValue& Value)
 {
-	const bool bWasPressed = RightGripInput >= GripPressedThreshold;
-	RightGripInput = Value.Get<float>();
-	const bool bIsPressed = RightGripInput >= GripPressedThreshold;
-	if (!bWasPressed && bIsPressed)
-	{
-		TryLockLimb(EClimbingLimb::RightHand);
-	}
+	UpdateLimbGripState(EClimbingLimb::RightHand, Value.Get<float>(), RightGripInput, RightGripPressStartTime, bRightGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbRightGripCompleted(const FInputActionValue& Value)
 {
-	RightGripInput = 0.0f;
-	ReleaseLimb(EClimbingLimb::RightHand);
+	CompleteLimbGripState(EClimbingLimb::RightHand, RightGripInput, RightGripPressStartTime, bRightGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbLeftFootGrip(const FInputActionValue& Value)
 {
-	const bool bWasPressed = LeftFootGripInput >= GripPressedThreshold;
-	LeftFootGripInput = Value.Get<float>();
-	const bool bIsPressed = LeftFootGripInput >= GripPressedThreshold;
-	if (!bWasPressed && bIsPressed)
-	{
-		TryLockLimb(EClimbingLimb::LeftFoot);
-	}
+	UpdateLimbGripState(EClimbingLimb::LeftFoot, Value.Get<float>(), LeftFootGripInput, LeftFootGripPressStartTime, bLeftFootGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbLeftFootGripCompleted(const FInputActionValue& Value)
 {
-	LeftFootGripInput = 0.0f;
-	ReleaseLimb(EClimbingLimb::LeftFoot);
+	CompleteLimbGripState(EClimbingLimb::LeftFoot, LeftFootGripInput, LeftFootGripPressStartTime, bLeftFootGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbRightFootGrip(const FInputActionValue& Value)
 {
-	const bool bWasPressed = RightFootGripInput >= GripPressedThreshold;
-	RightFootGripInput = Value.Get<float>();
-	const bool bIsPressed = RightFootGripInput >= GripPressedThreshold;
-	if (!bWasPressed && bIsPressed)
-	{
-		TryLockLimb(EClimbingLimb::RightFoot);
-	}
+	UpdateLimbGripState(EClimbingLimb::RightFoot, Value.Get<float>(), RightFootGripInput, RightFootGripPressStartTime, bRightFootGripLockTriggered);
 }
 
 void AClimbingCharacter::HandleClimbRightFootGripCompleted(const FInputActionValue& Value)
 {
-	RightFootGripInput = 0.0f;
-	ReleaseLimb(EClimbingLimb::RightFoot);
+	CompleteLimbGripState(EClimbingLimb::RightFoot, RightFootGripInput, RightFootGripPressStartTime, bRightFootGripLockTriggered);
+}
+
+void AClimbingCharacter::UpdateLimbGripState(EClimbingLimb Limb, float NewInputValue, float& StoredInputValue, float& PressStartTime, bool& bLockTriggered)
+{
+	const bool bWasPressed = StoredInputValue >= GripPressedThreshold;
+	StoredInputValue = NewInputValue;
+	const bool bIsPressed = StoredInputValue >= GripPressedThreshold;
+	if (!bIsPressed)
+	{
+		return;
+	}
+
+	if (!bWasPressed)
+	{
+		ActiveProbeLimb = Limb;
+		PressStartTime = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+		bLockTriggered = false;
+		return;
+	}
+
+	if (bLockTriggered)
+	{
+		return;
+	}
+
+	const float CurrentTimeSeconds = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0f;
+	if (CurrentTimeSeconds - PressStartTime < GripHoldLockDelaySeconds)
+	{
+		return;
+	}
+
+	TryLockLimb(Limb);
+	bLockTriggered = GetLimbState(Limb).bIsLocked;
+}
+
+void AClimbingCharacter::CompleteLimbGripState(EClimbingLimb Limb, float& StoredInputValue, float& PressStartTime, bool& bLockTriggered)
+{
+	StoredInputValue = 0.0f;
+	PressStartTime = -1.0f;
+	const bool bWasLocked = GetLimbState(Limb).bIsLocked;
+	bLockTriggered = false;
+
+	if (bWasLocked)
+	{
+		ReleaseLimb(Limb);
+	}
 }
 
 void AClimbingCharacter::TryLockLimb(EClimbingLimb Limb)

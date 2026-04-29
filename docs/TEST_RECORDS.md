@@ -560,10 +560,15 @@ Command verification:
 - Static inspection confirmed movement attachment authority remains hand-driven in `RefreshClimbingAttachment()`.
 - Static inspection confirmed support-aware probing now uses locked hands and feet together through `BuildSupportFrameFromLockedLimbs(...)`.
 - Static inspection confirmed mixed-support stability debug now derives its support span from the widest locked contact pair instead of assuming hands only.
+- Static inspection confirmed `Q/E/Z/C` now share one limb-grip rule: short press activates exploration, holding past the lock delay attempts grip, releasing a locked limb releases only that limb.
 - Added `docs/P4_MULTI_LIMB_SUPPORT_CHECKLIST.md` for phase-specific manual verification.
 
 Manual checks pending:
 
+- Short-press / long-press exploration and lock semantics for `Q/E/Z/C` passed in PIE:
+  - short press activates the matching limb without immediate lock
+  - holding past the delay attempts lock
+  - releasing a locked limb clears only that limb
 - Lock `1 hand + 2 feet` and confirm the remaining free hand can explore and lock from a mixed support-aware frame.
 - Confirm the same workflow on the mirrored side.
 - Confirm mixed-support debug values remain finite and readable.

@@ -141,6 +141,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Grip", meta=(ClampMin="0.0", ClampMax="1.0"))
 	float GripPressedThreshold = 0.35f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Grip", meta=(ClampMin="0.0", Units="s"))
+	float GripHoldLockDelaySeconds = 0.2f;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
 	FLimbState LeftHandState;
 
@@ -155,6 +158,30 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Limb")
 	EClimbingLimb ActiveProbeLimb = EClimbingLimb::RightHand;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	float LeftGripPressStartTime = -1.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	float RightGripPressStartTime = -1.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	float LeftFootGripPressStartTime = -1.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	float RightFootGripPressStartTime = -1.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	bool bLeftGripLockTriggered = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	bool bRightGripLockTriggered = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	bool bLeftFootGripLockTriggered = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Input")
+	bool bRightFootGripLockTriggered = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
 	float MaxCenterOfMassHorizontalOffset = 60.0f;
@@ -219,6 +246,8 @@ private:
 	void HandleClimbLeftFootGripCompleted(const FInputActionValue& Value);
 	void HandleClimbRightFootGrip(const FInputActionValue& Value);
 	void HandleClimbRightFootGripCompleted(const FInputActionValue& Value);
+	void UpdateLimbGripState(EClimbingLimb Limb, float NewInputValue, float& StoredInputValue, float& PressStartTime, bool& bLockTriggered);
+	void CompleteLimbGripState(EClimbingLimb Limb, float& StoredInputValue, float& PressStartTime, bool& bLockTriggered);
 	void TryLockLimb(EClimbingLimb Limb);
 	void ReleaseLimb(EClimbingLimb Limb);
 	bool HasLockedHand() const;

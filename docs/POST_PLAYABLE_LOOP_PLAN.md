@@ -124,6 +124,7 @@ Scope:
 - Decide when feet participate in attachment or stability models
 - Expand solver assumptions beyond hand-only support
 - Define how remaining free limbs continue exploration when hands and feet already share support
+- Unify limb input semantics so `Q/E/Z/C` short-press activates exploration and long-press commits grip
 
 Out of scope:
 
@@ -142,7 +143,8 @@ Current implementation order:
 
 1. Introduce a support-aware frame for debug, probe, and exploration that can average locked hands and feet.
 2. Keep movement attachment authority hand-driven until that first support-aware probe flow is validated.
-3. Revisit attachment ownership only after the mixed-support exploration workflow is stable.
+3. Normalize `Q/E/Z/C` so pressing a limb first selects it for exploration and only a hold commits to locking.
+4. Revisit attachment ownership only after the mixed-support exploration workflow is stable.
 
 ## Documentation Rule
 
