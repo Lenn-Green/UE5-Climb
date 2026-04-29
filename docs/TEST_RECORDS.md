@@ -478,3 +478,34 @@ Known risks:
 - Hand exploration search now uses a short wall-depth sweep around the plane target. Final plane extents and search depth may still need feel tuning.
 - Until the rig asset is updated, the new bridge data exists but will not change visible arm behavior on its own.
 - Foot grip flow still sets `ActiveProbeLimb` directly on press; this hand-first auto-selection rule is intentionally limited to the one-hand-supported exploration case in `P1`.
+
+## P2 - Control Rig Hand Stabilization
+
+Date: 2026-04-29
+
+Status: passed
+
+Gates checked so far: `G0`, `G6`
+
+Command verification:
+
+- No new gameplay authority was moved into Control Rig during P2 setup planning.
+- Added `docs/P2_HAND_STABILIZATION_CHECKLIST.md` as the working stabilization checklist for the current Rig pass.
+
+Manual checks:
+
+- Confirmed idle pose safety with no unintended hand FBIK influence while not climbing.
+- Confirmed locked left-hand and right-hand FBIK remain stable under the single-solver setup.
+- Confirmed exploration-hand FBIK remains stable without visible jitter or whole-body pull-away.
+- Confirmed exploration-to-lock transition remains readable.
+- Confirmed unlocking returns hand influence to base pose when no longer active.
+- Confirmed left and right hand behavior remain symmetric.
+
+Skipped checks:
+
+- No automated editor or animation test exists yet for Control Rig stabilization.
+
+Known risks:
+
+- Current stability still depends on in-editor `CR_ClimbingBody` tuning and asset wiring.
+- Hand rotation polish remains intentionally out of scope for this phase.

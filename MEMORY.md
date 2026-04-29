@@ -55,6 +55,7 @@ Playable Loop 1 is complete and documented. Use `docs/POST_PLAYABLE_LOOP_PLAN.md
 3. Foot support and future multi-limb support modeling
 
 `P1 - Hand Exploration And Hand Presentation` is complete and recorded in `docs/TEST_RECORDS.md`.
+`P2 - Control Rig Hand Stabilization` is complete and recorded in `docs/TEST_RECORDS.md`.
 
 ## Gate Policy
 

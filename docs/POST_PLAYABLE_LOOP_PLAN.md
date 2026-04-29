@@ -85,6 +85,8 @@ Acceptance:
 
 Mapped gates: `G0`, `G6`
 
+Status: passed and closed on 2026-04-29. Continue with `P3 - Foot Gameplay Support`.
+
 ## Stage P3 - Foot Gameplay Support
 
 Goal: turn the current minimal foot data path into a deliberate gameplay system.
