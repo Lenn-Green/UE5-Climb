@@ -651,7 +651,26 @@ void AClimbingCharacter::UpdateLimbProbeCandidate(const FClimbingAttachmentFrame
 	ClimbingDebugState.ProbeDirection = (ProbeTarget - ClimbingDebugState.ProbeOrigin).GetSafeNormal();
 
 	FClimbingHoldCandidate Candidate;
-	if (HoldQueryComponent && HoldQueryComponent->QueryBestHold(ClimbingDebugState.ProbeOrigin, ClimbingDebugState.ProbeDirection, Candidate))
+	if (!HoldQueryComponent)
+	{
+		ClimbingDebugState.CurrentHoldCandidate = FClimbingHoldCandidate();
+		return;
+	}
+
+	if ((ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand) &&
+		!GetLimbState(ActiveProbeLimb).bIsLocked)
+	{
+		const FClimbingAttachmentFrame ProbeFrame = BuildProbeFrame(AttachmentFrame, ClimbingDebugState.ProbeOrigin);
+		// Hand exploration uses a wall-local plane target. Search is centered on that target and
+		// swept through a short wall-depth band instead of a long aim-like ray.
+		const FVector SearchDirection = -ProbeFrame.WallNormal.GetSafeNormal();
+		if (HoldQueryComponent->QueryBestHoldNearPoint(ProbeTarget, SearchDirection, HandProbeSearchDepth, Candidate))
+		{
+			ClimbingDebugState.CurrentHoldCandidate = Candidate;
+			return;
+		}
+	}
+	else if (HoldQueryComponent->QueryBestHold(ClimbingDebugState.ProbeOrigin, ClimbingDebugState.ProbeDirection, Candidate))
 	{
 		ClimbingDebugState.CurrentHoldCandidate = Candidate;
 		return;

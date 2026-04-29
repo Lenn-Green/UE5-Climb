@@ -24,16 +24,36 @@ bool UClimbingHoldQueryComponent::QueryBestHoldFromViewpoint(FClimbingHoldCandid
 
 bool UClimbingHoldQueryComponent::QueryBestHold(const FVector& Start, const FVector& Direction, FClimbingHoldCandidate& OutCandidate) const
 {
+	const FVector NormalizedDirection = Direction.GetSafeNormal();
+	const FVector End = Start + NormalizedDirection * TraceDistance;
+	return QueryBestHoldSweep(Start, End, TraceDistance, OutCandidate);
+}
+
+bool UClimbingHoldQueryComponent::QueryBestHoldNearPoint(const FVector& Center, const FVector& SearchDirection, float SearchDistance, FClimbingHoldCandidate& OutCandidate) const
+{
 	OutCandidate = FClimbingHoldCandidate();
 
-	UWorld* World = GetWorld();
-	if (!World || Direction.IsNearlyZero())
+	if (SearchDirection.IsNearlyZero() || SearchDistance <= UE_KINDA_SMALL_NUMBER)
 	{
 		return false;
 	}
 
-	const FVector NormalizedDirection = Direction.GetSafeNormal();
-	const FVector End = Start + NormalizedDirection * TraceDistance;
+	const FVector NormalizedSearchDirection = SearchDirection.GetSafeNormal();
+	const float HalfDistance = SearchDistance * 0.5f;
+	const FVector Start = Center - NormalizedSearchDirection * HalfDistance;
+	const FVector End = Center + NormalizedSearchDirection * HalfDistance;
+	return QueryBestHoldSweep(Start, End, SearchDistance, OutCandidate);
+}
+
+bool UClimbingHoldQueryComponent::QueryBestHoldSweep(const FVector& Start, const FVector& End, float ScoreReferenceDistance, FClimbingHoldCandidate& OutCandidate) const
+{
+	OutCandidate = FClimbingHoldCandidate();
+
+	UWorld* World = GetWorld();
+	if (!World || Start.Equals(End))
+	{
+		return false;
+	}
 
 	FCollisionQueryParams QueryParams(SCENE_QUERY_STAT(ClimbingHoldQuery), bTraceComplex);
 	QueryParams.AddIgnoredActor(GetOwner());
@@ -64,6 +84,7 @@ bool UClimbingHoldQueryComponent::QueryBestHold(const FVector& Start, const FVec
 		}
 
 		FClimbingHoldCandidate Candidate = MakeCandidate(Hit, Start);
+		Candidate.Score = ScoreReferenceDistance - Candidate.Distance;
 		if (Candidate.Score > BestScore)
 		{
 			BestScore = Candidate.Score;

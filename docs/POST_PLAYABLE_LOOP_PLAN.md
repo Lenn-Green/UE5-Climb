@@ -41,6 +41,7 @@ Scope:
 - Add hand exploration target data in C++
 - Bridge unlocked active-hand exploration targets into AnimInstance / Control Rig
 - Make the active unlocked hand follow probe motion before grip lock
+- Keep hand exploration on a wall-local 2D search plane with automatic depth, rather than treating probe as a free 3D aim ray
 - Keep lock transition readable when switching from exploration target to locked contact target
 
 Out of scope:

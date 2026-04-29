@@ -19,6 +19,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Climbing|Hold Query")
 	bool QueryBestHold(const FVector& Start, const FVector& Direction, FClimbingHoldCandidate& OutCandidate) const;
 
+	UFUNCTION(BlueprintCallable, Category="Climbing|Hold Query")
+	bool QueryBestHoldNearPoint(const FVector& Center, const FVector& SearchDirection, float SearchDistance, FClimbingHoldCandidate& OutCandidate) const;
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Climbing|Hold Query", meta=(ClampMin="1.0", Units="cm"))
 	float TraceDistance = 250.0f;
@@ -39,6 +42,7 @@ protected:
 	float DebugDrawTime = 1.5f;
 
 private:
+	bool QueryBestHoldSweep(const FVector& Start, const FVector& End, float ScoreReferenceDistance, FClimbingHoldCandidate& OutCandidate) const;
 	FClimbingHoldCandidate MakeCandidate(const FHitResult& Hit, const FVector& Start) const;
 	bool IsExplicitHold(const FHitResult& Hit) const;
 };
