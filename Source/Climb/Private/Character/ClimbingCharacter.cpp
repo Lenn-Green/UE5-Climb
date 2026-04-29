@@ -681,11 +681,20 @@ FVector AClimbingCharacter::GetActiveLimbProbeOrigin(const FClimbingAttachmentFr
 		return ActiveLimbState.ContactLocation + AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance;
 	}
 
+	if (ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand)
+	{
+		// Unlocked hand probing must use a stable body-frame origin rather than the animated hand bone.
+		// Otherwise FBIK motion feeds back into gameplay probing and causes exploration jitter.
+		const float LateralSign = (ActiveProbeLimb == EClimbingLimb::LeftHand) ? -1.0f : 1.0f;
+		return
+			AttachmentFrame.AnchorLocation +
+			AttachmentFrame.WallNormal.GetSafeNormal() * AttachmentFrame.TargetWallDistance +
+			AttachmentFrame.WallRight.GetSafeNormal() * (HandProbeLateralOffset * LateralSign);
+	}
+
 	if (const USkeletalMeshComponent* MeshComponent = GetMesh())
 	{
 		const TArray<FName> ProbeSocketNames =
-			(ActiveProbeLimb == EClimbingLimb::LeftHand) ? TArray<FName>{TEXT("hand_probe_l"), TEXT("hand_l")} :
-			(ActiveProbeLimb == EClimbingLimb::RightHand) ? TArray<FName>{TEXT("hand_probe_r"), TEXT("hand_r")} :
 			(ActiveProbeLimb == EClimbingLimb::LeftFoot) ? TArray<FName>{TEXT("foot_probe_l"), TEXT("foot_l")} :
 			(ActiveProbeLimb == EClimbingLimb::RightFoot) ? TArray<FName>{TEXT("foot_probe_r"), TEXT("foot_r")} :
 			TArray<FName>{};

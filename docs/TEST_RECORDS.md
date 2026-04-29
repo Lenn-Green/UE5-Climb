@@ -452,6 +452,7 @@ Command verification:
 - Static inspection confirmed the new exploration target data is still transferred through `UClimbingAnimInstance` rather than computed inside Control Rig.
 - Static inspection confirmed hand grip inputs still own lock / release, while the free hand now auto-becomes `ActiveProbeLimb` when exactly one hand is locked.
 - Static inspection confirmed active hand exploration now follows the live probe ray continuously; hold candidates remain lock hints and no longer directly override the exploration target location.
+- Static inspection confirmed unlocked hand probing now uses a stable body-frame origin instead of animated hand sockets, preventing Control Rig feedback from re-driving gameplay probing.
 
 Manual checks pending:
 
@@ -472,5 +473,6 @@ Known risks:
 
 - Exploration targets currently use candidate location when a valid hold exists and probe-forward fallback otherwise; that may still need feel tuning.
 - Exploration targets now follow the live probe ray continuously; later tuning may still need candidate attraction or damping if the hand feels too loose.
+- Hand exploration origin now uses an attachment-frame lateral offset. Final shoulder/clavicle-biased origin tuning may still be needed for better visual reach.
 - Until the rig asset is updated, the new bridge data exists but will not change visible arm behavior on its own.
 - Foot grip flow still sets `ActiveProbeLimb` directly on press; this hand-first auto-selection rule is intentionally limited to the one-hand-supported exploration case in `P1`.
