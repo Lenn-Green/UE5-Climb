@@ -58,6 +58,8 @@ Acceptance:
 
 Mapped gates: `G0`, `G4`, `G6`, `G7`
 
+Status: passed and closed on 2026-04-29. Continue with `P2 - Control Rig Hand Stabilization`.
+
 ## Stage P2 - Control Rig Hand Stabilization
 
 Goal: make the current `CR_ClimbingBody` usable and repeatable without changing gameplay authority.

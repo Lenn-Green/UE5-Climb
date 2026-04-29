@@ -439,9 +439,9 @@ Known risks:
 
 ## P1 - Hand Exploration Target Bridge
 
-Date: 2026-04-28
+Date: 2026-04-29
 
-Status: pending manual editor verification
+Status: passed
 
 Gates checked so far: `G0`, `G1`, `G4`, `G6`, `G7`
 
@@ -455,15 +455,15 @@ Command verification:
 - Static inspection confirmed unlocked hand probing now uses a stable body-frame origin instead of animated hand sockets, preventing Control Rig feedback from re-driving gameplay probing.
 - Static inspection confirmed unlocked hand candidate search now uses a wall-local plane target with short depth sweep near that target, rather than a long aim-style ray from the hand probe origin.
 
-Manual checks pending:
+Manual checks:
 
-- Confirm `ABP_ClimbingCharacter` can read `LeftHandExplorationTarget` and `RightHandExplorationTarget`.
-- In `CR_ClimbingBody`, wire the active unlocked hand to the matching exploration target with lower weight than a locked hand target.
-- In PIE, lock one hand and confirm the opposite free hand automatically becomes `ActiveProbeLimb` before any new grip press.
-- In PIE, move probe input while that free hand remains unlocked.
-- Confirm the unlocked active hand visibly follows the probe search area instead of staying fixed in the base pose.
-- Lock a valid hold and confirm the hand transitions from exploration target to locked contact target without a large snap or mesh instability.
-- Repeat for the right hand.
+- Confirmed `ABP_ClimbingCharacter` can read `LeftHandExplorationTarget` and `RightHandExplorationTarget`.
+- In `CR_ClimbingBody`, wired the active unlocked hand to the matching exploration target with lower weight than a locked hand target.
+- In PIE, locked one hand and confirmed the opposite free hand automatically becomes `ActiveProbeLimb` before any new grip press.
+- In PIE, moved probe input while that free hand remained unlocked and confirmed the exploration target updates continuously.
+- Confirmed the unlocked active hand visibly follows the wall-local search area instead of staying fixed in the base pose.
+- Confirmed lock transition from exploration target to locked contact target completes without mesh pull-away or major snap.
+- Repeated the same validation for both left and right hands.
 
 Skipped checks:
 
