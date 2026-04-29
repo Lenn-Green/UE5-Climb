@@ -509,3 +509,38 @@ Known risks:
 
 - Current stability still depends on in-editor `CR_ClimbingBody` tuning and asset wiring.
 - Hand rotation polish remains intentionally out of scope for this phase.
+
+## P3 - Foot Gameplay Support
+
+Date: 2026-04-29
+
+Status: pending manual editor verification
+
+Gates checked so far: `G0`, `G1`, `G2`, `G3`, `G4`, `G6`, `G7`
+
+Command verification:
+
+- Existing foot gameplay code path is already present in `AClimbingCharacter`, `UClimbingAnimInstance`, and the current climbing bridge.
+- Added `docs/P3_FOOT_GAMEPLAY_CHECKLIST.md` as the phase-specific runtime verification checklist.
+- Prior baseline evidence remains available in:
+  - `Control Rig First-Pass Foot FBIK`
+  - `Foot Gameplay Data Chain`
+
+Manual checks pending:
+
+- Confirm left and right foot grip inputs still fire after the completed hand-side phases.
+- Confirm foot probe origin still uses the active foot region rather than the body center.
+- Confirm foot target area still behaves as foot-centered rather than hand-centered.
+- Confirm valid tagged holds lock for both feet.
+- Confirm invalid wall surfaces are rejected for both feet.
+- Confirm `LeftFootTarget` / `RightFootTarget` still bridge cleanly into animation / Control Rig.
+- Confirm release and climbing exit still clear stale foot state safely.
+
+Skipped checks:
+
+- No automated editor or animation test exists yet for foot gameplay runtime behavior.
+
+Known risks:
+
+- The movement attachment frame remains hand-driven by design in `P3`.
+- Existing foot logic was implemented before `P3` was formally opened, so this phase still needs explicit revalidation under the current plan boundary.
