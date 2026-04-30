@@ -67,6 +67,12 @@ struct CLIMB_API FClimbingControlRigTargets
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget RightFootTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget LeftFootExplorationTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget RightFootExplorationTarget;
 };
 
 UCLASS()
@@ -124,9 +130,16 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget RightFootTarget;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget LeftFootExplorationTarget;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	FClimbingLimbAnimTarget RightFootExplorationTarget;
+
 	// Suggested Control Rig variable contract:
 	// PelvisOffset, LeftHandTarget, RightHandTarget, LeftHandExplorationTarget,
-	// RightHandExplorationTarget, LeftFootTarget, RightFootTarget, ActiveProbeLimb.
+	// RightHandExplorationTarget, LeftFootTarget, RightFootTarget, LeftFootExplorationTarget,
+	// RightFootExplorationTarget, ActiveProbeLimb.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingControlRigTargets ControlRigTargets;
 

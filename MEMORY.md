@@ -50,13 +50,16 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
 
 Playable Loop 1 is complete and documented. Use `docs/POST_PLAYABLE_LOOP_PLAN.md` for all subsequent work on:
 
-1. Foot support and future multi-limb support modeling
-2. Immediate `P4` focus: let free-limb probe / exploration use a mixed support frame built from locked hands and feet before changing movement attachment authority
-3. Normalize `Q/E/Z/C` input semantics so short press activates limb exploration and hold commits the grip lock
+1. Future support-polygon and attachment-authority evolution beyond the current mixed-support pass
+2. Immediate focus: `P5 - Support Polygon And Multi-Contact Solver`
+3. Keep the current validated feet workflow fully manual until a separately planned stage changes that rule
+4. Do not introduce auto-stance, soft foot assist, or auto-lock logic without opening a new documented stage first
 
 `P1 - Hand Exploration And Hand Presentation` is complete and recorded in `docs/TEST_RECORDS.md`.
 `P2 - Control Rig Hand Stabilization` is complete and recorded in `docs/TEST_RECORDS.md`.
 `P3 - Foot Gameplay Support` is complete and recorded in `docs/TEST_RECORDS.md`.
+`P4 - Multi-Limb Support Model` is complete for the current fully manual mixed-support scope and recorded in `docs/TEST_RECORDS.md`.
+`P5 - Support Polygon And Multi-Contact Solver` is the active stage.
 
 ## Gate Policy
 

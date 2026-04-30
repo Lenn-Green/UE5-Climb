@@ -2,7 +2,7 @@
 
 Use this checklist only for `P4 - Multi-Limb Support Model`.
 
-## Scope of this first P4 pass
+## Scope of the current P4 pass
 
 - Keep movement attachment hand-driven.
 - Allow free-limb probe and exploration to use a mixed support frame built from locked hands and feet.
@@ -11,6 +11,16 @@ Use this checklist only for `P4 - Multi-Limb Support Model`.
   - short press on `Q/E/Z/C` activates the matching limb for exploration
   - hold past the lock delay attempts grip lock
   - releasing a locked limb releases that limb only
+- Bridge `LeftFootExplorationTarget` and `RightFootExplorationTarget` to AnimInstance / Control Rig.
+- Keep feet fully manual in this pass.
+  - No foot auto-stance recommendation
+  - No soft assist toward candidate footholds
+  - No automatic foot locking
+- Complete foot manual parity with hands.
+  - short press selects the matching foot for exploration
+  - active unlocked foot visibly explores before lock
+  - long press commits lock only after the hold threshold
+  - release clears only that foot
 
 ## Manual checks
 
@@ -25,6 +35,10 @@ Use this checklist only for `P4 - Multi-Limb Support Model`.
    - releasing a foot only clears that foot
    - releasing the exploring hand does not clear existing supports
    - releasing the final hand still exits climbing because movement attachment authority has not changed yet
+9. In `ABP_ClimbingCharacter`, confirm `LeftFootExplorationTarget` and `RightFootExplorationTarget` update for the active unlocked foot.
+10. In `CR_ClimbingBody`, confirm the active unlocked foot can visibly search using the new exploration target before lock.
+11. Confirm feet still require explicit manual exploration and manual lock input; no automatic foothold behavior should occur.
+12. Confirm foot manual behavior now matches hand manual behavior closely enough that feet are not treated as a weaker placeholder interaction path.
 
 ## Failing indicators
 
@@ -32,5 +46,7 @@ Use this checklist only for `P4 - Multi-Limb Support Model`.
 - Hold press does not commit a grip after the delay.
 - Free hand exploration still behaves as if only locked hands exist.
 - Free hand cannot naturally probe or lock while mixed supports remain active.
+- Active unlocked foot still has no exploration target data, or the rig cannot consume it.
 - Mixed support debug values stay stuck in the old hand-only behavior.
 - Mixed support probing breaks already validated hand-only or foot-only flows.
+- Feet begin auto-selecting or auto-locking footholds without explicit player input.

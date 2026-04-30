@@ -61,6 +61,8 @@ void UClimbingAnimInstance::SnapshotClimbingData()
 	RightHandExplorationTarget = MakeExplorationTarget(EClimbingLimb::RightHand, SkeletalMeshComponent);
 	LeftFootTarget = MakeAnimTarget(ClimbingCharacter->GetLeftFootState(), SkeletalMeshComponent);
 	RightFootTarget = MakeAnimTarget(ClimbingCharacter->GetRightFootState(), SkeletalMeshComponent);
+	LeftFootExplorationTarget = MakeExplorationTarget(EClimbingLimb::LeftFoot, SkeletalMeshComponent);
+	RightFootExplorationTarget = MakeExplorationTarget(EClimbingLimb::RightFoot, SkeletalMeshComponent);
 	UpdateControlRigTargets();
 }
 
@@ -108,6 +110,8 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::MakeExplorationTarget(EClimbingLi
 	const FLimbState LimbState =
 		(Limb == EClimbingLimb::LeftHand) ? ClimbingCharacter->GetLeftHandState() :
 		(Limb == EClimbingLimb::RightHand) ? ClimbingCharacter->GetRightHandState() :
+		(Limb == EClimbingLimb::LeftFoot) ? ClimbingCharacter->GetLeftFootState() :
+		(Limb == EClimbingLimb::RightFoot) ? ClimbingCharacter->GetRightFootState() :
 		FLimbState();
 	if (LimbState.bIsLocked)
 	{
@@ -143,6 +147,8 @@ void UClimbingAnimInstance::UpdateControlRigTargets()
 	ControlRigTargets.RightHandExplorationTarget = RightHandExplorationTarget;
 	ControlRigTargets.LeftFootTarget = LeftFootTarget;
 	ControlRigTargets.RightFootTarget = RightFootTarget;
+	ControlRigTargets.LeftFootExplorationTarget = LeftFootExplorationTarget;
+	ControlRigTargets.RightFootExplorationTarget = RightFootExplorationTarget;
 }
 
 void UClimbingAnimInstance::ResetClimbingData()
@@ -171,6 +177,12 @@ void UClimbingAnimInstance::ResetClimbingData()
 
 	RightFootTarget = FClimbingLimbAnimTarget();
 	RightFootTarget.Limb = EClimbingLimb::RightFoot;
+
+	LeftFootExplorationTarget = FClimbingLimbAnimTarget();
+	LeftFootExplorationTarget.Limb = EClimbingLimb::LeftFoot;
+
+	RightFootExplorationTarget = FClimbingLimbAnimTarget();
+	RightFootExplorationTarget.Limb = EClimbingLimb::RightFoot;
 
 	UpdateControlRigTargets();
 }

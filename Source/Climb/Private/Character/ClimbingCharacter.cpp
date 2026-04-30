@@ -721,15 +721,17 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 	}
 
 	UpdateLimbProbeCandidate(SupportFrame);
+	const FVector ProbeTarget = GetActiveLimbProbeTarget(SupportFrame, ClimbingDebugState.ProbeOrigin);
 
-	if ((ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand) && !GetLimbState(ActiveProbeLimb).bIsLocked)
+	if (!GetLimbState(ActiveProbeLimb).bIsLocked)
 	{
 		ClimbingDebugState.bHasActiveExplorationTarget = true;
-		// The exploration target should respond continuously to probe input rather than snapping
-		// to the current hold candidate. Candidate selection remains a lock hint; the hand reaches
-		// along the live probe ray so the player can visibly search before committing to a grab.
+		// Hand exploration extends beyond the probe origin to create a visible reach gesture.
+		// Foot exploration stays on the current wall-local probe target so feet search within their stance plane.
 		ClimbingDebugState.ActiveExplorationTargetLocation =
-			ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * HandExplorationReach;
+			(ActiveProbeLimb == EClimbingLimb::LeftHand || ActiveProbeLimb == EClimbingLimb::RightHand)
+			? (ClimbingDebugState.ProbeOrigin + ClimbingDebugState.ProbeDirection * HandExplorationReach)
+			: ProbeTarget;
 		ClimbingDebugState.ActiveExplorationTargetNormal = ClimbingDebugState.CurrentHoldCandidate.bIsValid
 			? ClimbingDebugState.CurrentHoldCandidate.Normal
 			: (-SupportFrame.WallNormal).GetSafeNormal();

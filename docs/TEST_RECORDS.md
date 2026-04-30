@@ -550,7 +550,7 @@ Known risks:
 
 Date: 2026-04-29
 
-Status: pending manual editor verification
+Status: passed
 
 Gates checked so far: `G0`, `G4`, `G5`, `G6`, `G7`
 
@@ -561,19 +561,53 @@ Command verification:
 - Static inspection confirmed support-aware probing now uses locked hands and feet together through `BuildSupportFrameFromLockedLimbs(...)`.
 - Static inspection confirmed mixed-support stability debug now derives its support span from the widest locked contact pair instead of assuming hands only.
 - Static inspection confirmed `Q/E/Z/C` now share one limb-grip rule: short press activates exploration, holding past the lock delay attempts grip, releasing a locked limb releases only that limb.
+- Static inspection confirmed `LeftFootExplorationTarget` and `RightFootExplorationTarget` now bridge from `AClimbingCharacter` debug exploration data through `UClimbingAnimInstance` into `ControlRigTargets`.
 - Added `docs/P4_MULTI_LIMB_SUPPORT_CHECKLIST.md` for phase-specific manual verification.
 
-Manual checks pending:
+Manual checks:
 
-- Short-press / long-press exploration and lock semantics for `Q/E/Z/C` passed in PIE:
+- `P4.A` passed:
+- Confirmed short-press / long-press exploration and lock semantics for `Q/E/Z/C` in PIE:
   - short press activates the matching limb without immediate lock
   - holding past the delay attempts lock
   - releasing a locked limb clears only that limb
-- Lock `1 hand + 2 feet` and confirm the remaining free hand can explore and lock from a mixed support-aware frame.
-- Confirm the same workflow on the mirrored side.
-- Confirm mixed-support debug values remain finite and readable.
+- Confirmed under `1 hand + 2 feet` support that the remaining free hand can explore and lock from a mixed support-aware frame.
+- Confirmed the same mixed-support workflow on the mirrored side.
+- Confirmed mixed-support debug values remain finite and readable.
+- Confirmed `LeftFootExplorationTarget` / `RightFootExplorationTarget` update in `ABP_ClimbingCharacter`.
+- Confirmed the active unlocked foot can visibly explore in `CR_ClimbingBody` before lock.
+- Confirmed feet remain fully manual in this phase:
+  - feet do not auto-select footholds
+  - feet do not soft-assist toward footholds
+  - feet do not auto-lock without explicit player input
+- Confirm active unlocked feet now explore with the same short-press / visible-search / long-press lock contract already validated for hands.
+- Confirm left and right foot exploration feel symmetric and do not behave like a placeholder branch compared with hands.
+- Confirm explicit manual foot exploration remains stable under mixed support without introducing automatic foothold behavior.
 
 Known risks:
 
 - Movement attachment is still hand-driven in this first `P4` pass, so releasing the final hand still exits climbing even if feet remain locked.
 - Mixed-support stability currently reuses the existing two-point solver by choosing the widest locked support pair; a real support polygon solver is still future work.
+- Feet remain fully manual by design in `P4`; any future auto-stance or foot-assist work must be opened as a separate follow-up stage, not added ad hoc to this phase.
+
+## P5 - Support Polygon And Multi-Contact Solver
+
+Date: 2026-04-30
+
+Status: pending implementation
+
+Gates expected: `G0`, `G4`, `G5`, `G7`
+
+Command verification pending:
+
+- Build `ClimbEditor Win64 Development`.
+- Run existing solver automation plus any new multi-contact tests added in this stage.
+
+Manual checks pending:
+
+- Validate `2 hands`, `1 hand + 2 feet`, and `2 hands + 2 feet` debug outputs against the new solver path.
+- Confirm manual hand/foot exploration and lock flows still behave correctly after solver changes.
+
+Known risks at stage open:
+
+- Current mixed-support debug still uses a widest-pair approximation and can under-represent true three- or four-contact support.
