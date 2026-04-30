@@ -198,7 +198,44 @@ Current implementation order:
 3. Replace the current widest-pair debug shortcut with the new solver path.
 4. Revalidate mixed-support debug and manual climbing flows without changing attachment authority.
 
-Status: open. `P5 - Support Polygon And Multi-Contact Solver` is the active stage.
+Status: passed and closed on 2026-04-30.
+
+## Stage P6 - Attachment Authority And Support Ownership
+
+Goal: align gameplay attachment authority with the new multi-contact support model instead of keeping locomotion ownership hand-only.
+
+Scope:
+
+- Decide when feet become attachment-authority contributors instead of support-only contacts
+- Define explicit transition rules between:
+  - hand-driven attachment
+  - mixed-support attachment
+  - attachment loss and falling
+- Update movement-facing attachment ownership without moving solver or trace logic into animation
+- Keep feet fully manual unless a future stage explicitly changes that rule
+
+Out of scope:
+
+- Auto-stance, soft foot assist, or auto-lock
+- Final authored climbing move set
+- Stamina, dyno chaining, or resonance swing integration
+
+Acceptance:
+
+- Attachment ownership no longer assumes hands are the only support authority when mixed supports are valid
+- Releasing the final hand does not automatically force falling if the remaining valid supports should keep the climber attached under the new explicit rules
+- State transitions remain explicit, debuggable, and documented
+
+Mapped gates: `G0`, `G4`, `G5`, `G7`
+
+Current implementation order:
+
+1. Define attachment-authority rules for hands, feet, and mixed supports.
+2. Update movement-facing attachment refresh logic to consume the new ownership rules.
+3. Revalidate release behavior, especially loss of final hand under supported mixed-contact cases.
+4. Reconfirm manual hand/foot exploration and lock flows after ownership changes.
+
+Status: open. `P6 - Attachment Authority And Support Ownership` is the active stage.
 
 ## Documentation Rule
 

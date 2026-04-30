@@ -663,7 +663,8 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 		SupportFrame.WallNormal.GetSafeNormal() * SupportFrame.TargetWallDistance +
 		ClimbingDebugState.CenterOfMassTargetOffset;
 
-	TArray<FVector, TInlineAllocator<4>> LockedSupportContacts;
+	TArray<FVector> LockedSupportContacts;
+	LockedSupportContacts.Reserve(4);
 	const auto AddLockedSupportContact = [&](const FLimbState& LimbState)
 	{
 		if (LimbState.bIsLocked)
@@ -679,36 +680,16 @@ void AClimbingCharacter::UpdateClimbingDebugState(float DeltaSeconds)
 
 	if (LockedSupportContacts.Num() >= 2)
 	{
-		// Multi-limb support is approximated as the widest contact pair so the existing two-point
-		// solver can reflect feet contributing to the current support span before a full polygon solver exists.
-		FVector SupportPointA = LockedSupportContacts[0];
-		FVector SupportPointB = LockedSupportContacts[1];
-		float MaxSupportSpanSquared = FVector::DistSquared(SupportPointA, SupportPointB);
-		for (int32 IndexA = 0; IndexA < LockedSupportContacts.Num(); ++IndexA)
-		{
-			for (int32 IndexB = IndexA + 1; IndexB < LockedSupportContacts.Num(); ++IndexB)
-			{
-				const float CurrentSpanSquared = FVector::DistSquared(LockedSupportContacts[IndexA], LockedSupportContacts[IndexB]);
-				if (CurrentSpanSquared > MaxSupportSpanSquared)
-				{
-					MaxSupportSpanSquared = CurrentSpanSquared;
-					SupportPointA = LockedSupportContacts[IndexA];
-					SupportPointB = LockedSupportContacts[IndexB];
-				}
-			}
-		}
-
-		const FClimbingStabilityResult Stability = UClimbingSolver::EstimateTwoPointStability(
+		const FClimbingStabilityResult Stability = UClimbingSolver::EstimateMultiContactStability(
 			ClimbingDebugState.CenterOfMassTarget,
-			SupportPointA,
-			SupportPointB,
+			LockedSupportContacts,
 			SupportFrame.WallNormal,
 			StableOffsetThreshold);
 
-		ClimbingDebugState.CurrentBodyTension = UClimbingSolver::EstimateBodyTension(
+		ClimbingDebugState.CurrentBodyTension = UClimbingSolver::EstimateMultiContactBodyTension(
 			ClimbingDebugState.CenterOfMassTarget,
-			SupportPointA,
-			SupportPointB,
+			LockedSupportContacts,
+			SupportFrame.WallNormal,
 			MaxBodyTensionOffset);
 		ClimbingDebugState.StabilityPercent = Stability.StabilityPercent;
 		ClimbingDebugState.bIsPoseStable = Stability.bIsStable;

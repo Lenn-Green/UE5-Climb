@@ -67,6 +67,63 @@ bool FClimbingSolverBodyTensionTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FClimbingSolverMultiContactStabilityTest, "Climb.Solver.EstimateMultiContactStability", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FClimbingSolverMultiContactStabilityTest::RunTest(const FString& Parameters)
+{
+	const TArray<FVector> SupportContacts{
+		FVector(0.0f, -40.0f, 0.0f),
+		FVector(0.0f, 40.0f, 0.0f),
+		FVector(0.0f, 0.0f, 80.0f)
+	};
+
+	const FClimbingStabilityResult Stable = UClimbingSolver::EstimateMultiContactStability(
+		FVector(0.0f, 0.0f, 20.0f),
+		SupportContacts,
+		FVector::ForwardVector,
+		20.0f);
+
+	TestTrue(TEXT("Projected CoM inside support triangle is stable"), Stable.bIsStable);
+	TestEqual(TEXT("Inside polygon produces full stability percent"), Stable.StabilityPercent, 1.0f);
+
+	const FClimbingStabilityResult Unstable = UClimbingSolver::EstimateMultiContactStability(
+		FVector(0.0f, 0.0f, 140.0f),
+		SupportContacts,
+		FVector::ForwardVector,
+		20.0f);
+
+	TestFalse(TEXT("Projected CoM outside support triangle becomes unstable"), Unstable.bIsStable);
+	TestTrue(TEXT("Outside polygon lowers stability percent"), Unstable.StabilityPercent < 1.0f);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FClimbingSolverMultiContactBodyTensionTest, "Climb.Solver.EstimateMultiContactBodyTension", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FClimbingSolverMultiContactBodyTensionTest::RunTest(const FString& Parameters)
+{
+	// A three-point support triangle should still produce a readable tension gradient as the CoM approaches an edge.
+	const TArray<FVector> SupportContacts{
+		FVector(0.0f, -50.0f, 0.0f),
+		FVector(0.0f, 50.0f, 0.0f),
+		FVector(0.0f, 0.0f, 100.0f)
+	};
+
+	const float LowerTension = UClimbingSolver::EstimateMultiContactBodyTension(
+		FVector(0.0f, 0.0f, 30.0f),
+		SupportContacts,
+		FVector::ForwardVector,
+		40.0f);
+
+	const float HigherTension = UClimbingSolver::EstimateMultiContactBodyTension(
+		FVector(0.0f, 0.0f, 85.0f),
+		SupportContacts,
+		FVector::ForwardVector,
+		40.0f);
+
+	TestTrue(TEXT("Moving closer to the support boundary increases multi-contact body tension"), HigherTension > LowerTension);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FClimbingSolverDynoVelocityTest, "Climb.Solver.CalculateDynoLaunchVelocity", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool FClimbingSolverDynoVelocityTest::RunTest(const FString& Parameters)

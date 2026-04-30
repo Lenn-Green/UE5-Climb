@@ -594,20 +594,30 @@ Known risks:
 
 Date: 2026-04-30
 
-Status: pending implementation
+Status: passed
 
 Gates expected: `G0`, `G4`, `G5`, `G7`
 
-Command verification pending:
+Command verification:
 
-- Build `ClimbEditor Win64 Development`.
-- Run existing solver automation plus any new multi-contact tests added in this stage.
+- `ClimbEditor Win64 Development` build passed after replacing the widest-pair approximation with multi-contact solver calls.
+- `UnrealEditor-Cmd.exe ... -ExecCmds="Automation RunTests Climb.Solver; Quit"` completed successfully.
+- Automation log reported 6 discovered solver tests and `Success` for:
+  - `Climb.Solver.ProjectCenterOfMassToWallPlane`
+  - `Climb.Solver.EstimateTwoPointStability`
+  - `Climb.Solver.EstimateBodyTension`
+  - `Climb.Solver.EstimateMultiContactStability`
+  - `Climb.Solver.EstimateMultiContactBodyTension`
+  - `Climb.Solver.CalculateDynoLaunchVelocity`
+- Static inspection confirmed the new multi-contact support model remains inside `UClimbingSolver`.
 
-Manual checks pending:
+Manual checks:
 
-- Validate `2 hands`, `1 hand + 2 feet`, and `2 hands + 2 feet` debug outputs against the new solver path.
-- Confirm manual hand/foot exploration and lock flows still behave correctly after solver changes.
+- Validated `2 hands`, `1 hand + 2 feet`, and `2 hands + 2 feet` debug outputs against the new solver path.
+- Confirmed `CurrentBodyTension`, `StabilityPercent`, and `bIsPoseStable` remain finite, readable, and continuous while moving CoM under three- and four-contact support.
+- Confirmed manual hand/foot exploration and lock flows still behave correctly after solver changes.
 
-Known risks at stage open:
+Known risks:
 
-- Current mixed-support debug still uses a widest-pair approximation and can under-represent true three- or four-contact support.
+- Movement attachment authority is still hand-driven, so support evaluation and locomotion attachment are not yet owned by the same multi-contact model.
+- The current multi-contact solver improves debug and stability estimation, but support ownership and attachment transitions still need a later stage.

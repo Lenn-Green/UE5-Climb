@@ -50,5 +50,11 @@ public:
 	static float EstimateBodyTension(const FVector& CenterOfMass, const FVector& FirstContact, const FVector& SecondContact, float MaxBodyTensionOffsetCm = 120.0f);
 
 	UFUNCTION(BlueprintPure, Category="Climbing|Solver")
+	static FClimbingStabilityResult EstimateMultiContactStability(const FVector& CenterOfMass, const TArray<FVector>& SupportContacts, const FVector& WallNormal, float StableOffsetCm = 75.0f);
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Solver")
+	static float EstimateMultiContactBodyTension(const FVector& CenterOfMass, const TArray<FVector>& SupportContacts, const FVector& WallNormal, float MaxBodyTensionOffsetCm = 120.0f);
+
+	UFUNCTION(BlueprintPure, Category="Climbing|Solver")
 	static FVector CalculateDynoLaunchVelocity(const FVector& StartLocation, const FVector& TargetLocation, float TimeToTargetSeconds = 0.55f, float GravityZ = -980.0f, float MaxLaunchSpeed = 1800.0f);
 };
