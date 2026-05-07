@@ -252,6 +252,8 @@ private:
 	void ReleaseLimb(EClimbingLimb Limb);
 	bool HasLockedHand() const;
 	bool HasLockedFoot() const;
+	int32 GetLockedSupportCount() const;
+	FClimbingAttachmentFrame BuildAttachmentAuthorityFrame() const;
 	void RefreshClimbingAttachment();
 	void UpdateHandLoadPercentages();
 	FLimbState& GetMutableLimbState(EClimbingLimb Limb);

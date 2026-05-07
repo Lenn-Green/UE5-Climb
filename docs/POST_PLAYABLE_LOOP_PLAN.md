@@ -235,7 +235,15 @@ Current implementation order:
 3. Revalidate release behavior, especially loss of final hand under supported mixed-contact cases.
 4. Reconfirm manual hand/foot exploration and lock flows after ownership changes.
 
-Status: open. `P6 - Attachment Authority And Support Ownership` is the active stage.
+Status: deferred on 2026-05-07.
+
+Deferral note:
+
+- Pure support-balance ownership is not ready yet.
+- The user decision is to keep the simpler rule for now:
+  - releasing the final hand always exits climbing
+  - feet remain support contributors, not attachment owners
+- A later return to `P6` must include richer posture and hold-shape analysis instead of treating the current support solver as sufficient attachment authority by itself.
 
 ## Documentation Rule
 

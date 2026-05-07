@@ -51,7 +51,7 @@ Climb is an Unreal Engine 5.4 hardcore climbing simulation demo. The goal is not
 Playable Loop 1 is complete and documented. Use `docs/POST_PLAYABLE_LOOP_PLAN.md` for all subsequent work on:
 
 1. Future attachment-authority evolution beyond the current manual mixed-support pass
-2. Immediate focus: `P6 - Attachment Authority And Support Ownership`
+2. `P6 - Attachment Authority And Support Ownership` is deferred until posture-aware and hold-shape-aware balance analysis exists
 3. Keep the current validated feet workflow fully manual until a separately planned stage changes that rule
 4. Do not introduce auto-stance, soft foot assist, or auto-lock logic without opening a new documented stage first
 
@@ -60,7 +60,7 @@ Playable Loop 1 is complete and documented. Use `docs/POST_PLAYABLE_LOOP_PLAN.md
 `P3 - Foot Gameplay Support` is complete and recorded in `docs/TEST_RECORDS.md`.
 `P4 - Multi-Limb Support Model` is complete for the current fully manual mixed-support scope and recorded in `docs/TEST_RECORDS.md`.
 `P5 - Support Polygon And Multi-Contact Solver` is complete and recorded in `docs/TEST_RECORDS.md`.
-`P6 - Attachment Authority And Support Ownership` is the active stage.
+`P6 - Attachment Authority And Support Ownership` is deferred. Current gameplay rule remains: releasing the final hand exits climbing.
 
 ## Gate Policy
 

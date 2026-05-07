@@ -621,3 +621,31 @@ Known risks:
 
 - Movement attachment authority is still hand-driven, so support evaluation and locomotion attachment are not yet owned by the same multi-contact model.
 - The current multi-contact solver improves debug and stability estimation, but support ownership and attachment transitions still need a later stage.
+
+## P6 - Attachment Authority And Support Ownership
+
+Date: 2026-04-30
+
+Status: deferred
+
+Gates expected: `G0`, `G4`, `G5`, `G7`
+
+Command verification:
+
+- Initial ownership-rule prototype was compiled successfully.
+- The prototype was then intentionally rolled back to the simpler validated rule:
+  - releasing the final hand exits climbing
+  - feet do not become attachment owners in this pass
+- `ClimbEditor Win64 Development` build passed after restoring that simpler rule.
+- `docs/P6_ATTACHMENT_AUTHORITY_CHECKLIST.md` remains as a future-stage checklist, not an active acceptance target.
+
+Manual checks:
+
+- Deferred by design.
+
+Known risks:
+
+- Current attachment ownership is intentionally simpler than the support solver:
+  - support stability can be multi-contact
+  - movement attachment still requires at least one locked hand
+- Returning to `P6` later will require posture-aware and hold-shape-aware analysis before feet can own attachment safely.

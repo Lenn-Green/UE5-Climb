@@ -410,13 +410,7 @@ void AClimbingCharacter::ReleaseLimb(EClimbingLimb Limb)
 	UpdateHandLoadPercentages();
 	RefreshAutomaticActiveHand();
 
-	if (bWasLocked && !HasLockedHand() && IsClimbing())
-	{
-		ExitClimbing();
-		return;
-	}
-
-	if (bWasLocked && HasLockedHand() && IsClimbing())
+	if (bWasLocked && IsClimbing())
 	{
 		RefreshClimbingAttachment();
 	}
@@ -432,9 +426,31 @@ bool AClimbingCharacter::HasLockedFoot() const
 	return LeftFootState.bIsLocked || RightFootState.bIsLocked;
 }
 
+int32 AClimbingCharacter::GetLockedSupportCount() const
+{
+	return
+		(LeftHandState.bIsLocked ? 1 : 0) +
+		(RightHandState.bIsLocked ? 1 : 0) +
+		(LeftFootState.bIsLocked ? 1 : 0) +
+		(RightFootState.bIsLocked ? 1 : 0);
+}
+
+FClimbingAttachmentFrame AClimbingCharacter::BuildAttachmentAuthorityFrame() const
+{
+	const FClimbingAttachmentFrame HandAttachmentFrame = BuildAttachmentFrameFromLockedHands();
+	const FClimbingAttachmentFrame SupportFrame = BuildSupportFrameFromLockedLimbs(HandAttachmentFrame);
+
+	if (!HasLockedHand())
+	{
+		return FClimbingAttachmentFrame();
+	}
+
+	return HasLockedFoot() ? SupportFrame : HandAttachmentFrame;
+}
+
 void AClimbingCharacter::RefreshClimbingAttachment()
 {
-	const FClimbingAttachmentFrame AttachmentFrame = BuildAttachmentFrameFromLockedHands();
+	const FClimbingAttachmentFrame AttachmentFrame = BuildAttachmentAuthorityFrame();
 	if (!AttachmentFrame.bIsValid)
 	{
 		if (IsClimbing())
