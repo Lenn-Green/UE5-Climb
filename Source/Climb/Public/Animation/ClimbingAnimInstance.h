@@ -9,6 +9,15 @@
 class AClimbingCharacter;
 class USkeletalMeshComponent;
 
+UENUM(BlueprintType)
+enum class EClimbingLimbPresentationState : uint8
+{
+	Inactive UMETA(DisplayName="Inactive"),
+	Exploration UMETA(DisplayName="Exploration"),
+	Locked UMETA(DisplayName="Locked"),
+	Releasing UMETA(DisplayName="Releasing")
+};
+
 USTRUCT(BlueprintType)
 struct CLIMB_API FClimbingLimbAnimTarget
 {
@@ -63,6 +72,30 @@ struct CLIMB_API FClimbingControlRigTargets
 	FClimbingLimbAnimTarget RightHandExplorationTarget;
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState LeftHandPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState RightHandPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftHandIsExploration = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftHandIsLocked = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftHandIsReleasing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightHandIsExploration = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightHandIsLocked = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightHandIsReleasing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget LeftFootTarget;
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
@@ -73,6 +106,30 @@ struct CLIMB_API FClimbingControlRigTargets
 
 	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget RightFootExplorationTarget;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState LeftFootPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState RightFootPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftFootIsExploration = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftFootIsLocked = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftFootIsReleasing = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightFootIsExploration = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightFootIsLocked = false;
+
+	UPROPERTY(BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightFootIsReleasing = false;
 };
 
 UCLASS()
@@ -125,6 +182,30 @@ protected:
 	FClimbingLimbAnimTarget RightHandExplorationTarget;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState LeftHandPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState RightHandPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftHandIsExploration = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftHandIsLocked = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftHandIsReleasing = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightHandIsExploration = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightHandIsLocked = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightHandIsReleasing = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget LeftFootTarget;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
@@ -136,6 +217,30 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingLimbAnimTarget RightFootExplorationTarget;
 
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState LeftFootPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	EClimbingLimbPresentationState RightFootPresentationState = EClimbingLimbPresentationState::Inactive;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftFootIsExploration = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftFootIsLocked = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bLeftFootIsReleasing = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightFootIsExploration = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightFootIsLocked = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
+	bool bRightFootIsReleasing = false;
+
 	// Suggested Control Rig variable contract:
 	// PelvisOffset, LeftHandTarget, RightHandTarget, LeftHandExplorationTarget,
 	// RightHandExplorationTarget, LeftFootTarget, RightFootTarget, LeftFootExplorationTarget,
@@ -143,11 +248,70 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	FClimbingControlRigTargets ControlRigTargets;
 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
+	float PelvisOffsetInterpSpeed = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
+	float LockedTargetInterpSpeed = 16.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
+	float ExplorationTargetInterpSpeed = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
+	float TargetRotationInterpSpeed = 14.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
+	float ReleaseTargetInterpSpeed = 14.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0", Units="cm"))
+	float ReleaseTargetCompletionDistance = 2.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="0.0", Units="cm"))
+	float HandLockedSurfaceClearance = 6.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="0.0", Units="cm"))
+	float HandExplorationSurfaceClearance = 10.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="0.0", Units="cm"))
+	float FootLockedSurfaceClearance = 4.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="0.0", Units="cm"))
+	float FootExplorationSurfaceClearance = 6.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="1.0", Units="cm"))
+	float HandLockedMaxReach = 95.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="1.0", Units="cm"))
+	float HandExplorationMaxReach = 82.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="1.0", Units="cm"))
+	float FootLockedMaxReach = 105.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="1.0", Units="cm"))
+	float FootExplorationMaxReach = 88.0f;
+
 private:
 	void ResolveClimbingCharacter();
-	void SnapshotClimbingData();
+	void SnapshotClimbingData(float DeltaSeconds);
 	static FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent);
 	FClimbingLimbAnimTarget MakeExplorationTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
+	static EClimbingLimbPresentationState DeterminePresentationState(
+		const FClimbingLimbAnimTarget& LockedTarget,
+		const FClimbingLimbAnimTarget& ExplorationTarget,
+		bool bIsReleasing);
+	FClimbingLimbAnimTarget SmoothLimbTarget(
+		const FClimbingLimbAnimTarget& CurrentTarget,
+		const FClimbingLimbAnimTarget& DesiredTarget,
+		float DeltaSeconds,
+		const USkeletalMeshComponent* SkeletalMeshComponent,
+		bool& bOutIsReleasing) const;
+	FClimbingLimbAnimTarget ApplyPresentationConstraints(
+		const FClimbingLimbAnimTarget& Target,
+		const USkeletalMeshComponent* SkeletalMeshComponent) const;
+	FVector GetLimbReferenceLocation(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
+	float GetSurfaceClearance(EClimbingLimb Limb, bool bIsLocked) const;
+	float GetMaxReach(EClimbingLimb Limb, bool bIsLocked) const;
 	void UpdateControlRigTargets();
 	void ResetClimbingData();
 };

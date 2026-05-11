@@ -26,7 +26,7 @@ bool UClimbingHoldQueryComponent::QueryBestHold(const FVector& Start, const FVec
 {
 	const FVector NormalizedDirection = Direction.GetSafeNormal();
 	const FVector End = Start + NormalizedDirection * TraceDistance;
-	return QueryBestHoldSweep(Start, End, TraceDistance, OutCandidate);
+	return QueryBestHoldSweep(Start, End, Start, TraceDistance, OutCandidate);
 }
 
 bool UClimbingHoldQueryComponent::QueryBestHoldNearPoint(const FVector& Center, const FVector& SearchDirection, float SearchDistance, FClimbingHoldCandidate& OutCandidate) const
@@ -42,10 +42,10 @@ bool UClimbingHoldQueryComponent::QueryBestHoldNearPoint(const FVector& Center, 
 	const float HalfDistance = SearchDistance * 0.5f;
 	const FVector Start = Center - NormalizedSearchDirection * HalfDistance;
 	const FVector End = Center + NormalizedSearchDirection * HalfDistance;
-	return QueryBestHoldSweep(Start, End, SearchDistance, OutCandidate);
+	return QueryBestHoldSweep(Start, End, Center, SearchDistance, OutCandidate);
 }
 
-bool UClimbingHoldQueryComponent::QueryBestHoldSweep(const FVector& Start, const FVector& End, float ScoreReferenceDistance, FClimbingHoldCandidate& OutCandidate) const
+bool UClimbingHoldQueryComponent::QueryBestHoldSweep(const FVector& Start, const FVector& End, const FVector& ScoreOrigin, float ScoreReferenceDistance, FClimbingHoldCandidate& OutCandidate) const
 {
 	OutCandidate = FClimbingHoldCandidate();
 
@@ -83,7 +83,10 @@ bool UClimbingHoldQueryComponent::QueryBestHoldSweep(const FVector& Start, const
 			continue;
 		}
 
-		FClimbingHoldCandidate Candidate = MakeCandidate(Hit, Start);
+		// Near-point limb queries should rank holds around the intended reach-plane target rather than
+		// around the sweep segment start. This keeps the selected hold aligned with the nearest
+		// reachable point for the active hand or foot.
+		FClimbingHoldCandidate Candidate = MakeCandidate(Hit, ScoreOrigin);
 		Candidate.Score = ScoreReferenceDistance - Candidate.Distance;
 		if (Candidate.Score > BestScore)
 		{
@@ -101,7 +104,7 @@ bool UClimbingHoldQueryComponent::QueryBestHoldSweep(const FVector& Start, const
 	return OutCandidate.bIsValid;
 }
 
-FClimbingHoldCandidate UClimbingHoldQueryComponent::MakeCandidate(const FHitResult& Hit, const FVector& Start) const
+FClimbingHoldCandidate UClimbingHoldQueryComponent::MakeCandidate(const FHitResult& Hit, const FVector& ScoreOrigin) const
 {
 	FClimbingHoldCandidate Candidate;
 	Candidate.bIsValid = true;
@@ -109,7 +112,7 @@ FClimbingHoldCandidate UClimbingHoldQueryComponent::MakeCandidate(const FHitResu
 	Candidate.Normal = Hit.ImpactNormal.GetSafeNormal();
 	Candidate.Actor = Hit.GetActor();
 	Candidate.Component = Hit.GetComponent();
-	Candidate.Distance = FVector::Distance(Start, Hit.ImpactPoint);
+	Candidate.Distance = FVector::Distance(ScoreOrigin, Hit.ImpactPoint);
 	Candidate.Score = TraceDistance - Candidate.Distance;
 	return Candidate;
 }

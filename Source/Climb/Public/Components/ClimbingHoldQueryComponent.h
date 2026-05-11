@@ -42,7 +42,7 @@ protected:
 	float DebugDrawTime = 1.5f;
 
 private:
-	bool QueryBestHoldSweep(const FVector& Start, const FVector& End, float ScoreReferenceDistance, FClimbingHoldCandidate& OutCandidate) const;
-	FClimbingHoldCandidate MakeCandidate(const FHitResult& Hit, const FVector& Start) const;
+	bool QueryBestHoldSweep(const FVector& Start, const FVector& End, const FVector& ScoreOrigin, float ScoreReferenceDistance, FClimbingHoldCandidate& OutCandidate) const;
+	FClimbingHoldCandidate MakeCandidate(const FHitResult& Hit, const FVector& ScoreOrigin) const;
 	bool IsExplicitHold(const FHitResult& Hit) const;
 };

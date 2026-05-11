@@ -649,3 +649,53 @@ Known risks:
   - support stability can be multi-contact
   - movement attachment still requires at least one locked hand
 - Returning to `P6` later will require posture-aware and hold-shape-aware analysis before feet can own attachment safely.
+
+## P7 - Motion Smoothing And Pose Stability
+
+Date: 2026-05-07
+
+Status: command-verified, pending manual editor verification
+
+Gates expected: `G0`, `G4`, `G6`, `G7`
+
+Command verification:
+
+- Added `docs/P7_MOTION_SMOOTHING_CHECKLIST.md` for phase-specific verification.
+- `ClimbEditor Win64 Development` build passed after adding first-pass animation-bridge smoothing for pelvis and limb targets.
+- Static inspection confirmed smoothing was added in `UClimbingAnimInstance`, not in solver, trace, or Control Rig gameplay decision paths.
+- Static inspection confirmed this pass smooths:
+  - pelvis offset
+  - locked limb targets
+  - exploration limb targets
+  while keeping existing manual input semantics unchanged.
+- `ClimbEditor Win64 Development` build also passed after adding first-pass presentation constraints for:
+  - surface clearance offsets that keep limb targets slightly off the hold surface
+  - max reach clamps that reduce extreme target jumps before FBIK solves them
+- `P7.B - Limb Reach Plane Query` is now explicitly planned because real climbing holds exposed that current hand probing still depends too much on a low body-origin style search.
+- `ClimbEditor Win64 Development` build passed after moving hand probing toward a wall-local reach-plane center instead of a low body-origin line.
+- Static inspection confirmed initial non-climbing grip attempts now try the active limb query path before falling back to actor-viewpoint tracing.
+- `ClimbEditor Win64 Development` build passed after moving foot probing toward its own wall-local reach-plane center instead of keeping a mixed origin/bias fallback.
+- `ClimbEditor Win64 Development` build passed after changing near-point hold scoring so reach-plane queries rank candidates by distance to the limb reach-plane target center instead of distance to the sweep start.
+- `ClimbEditor Win64 Development` build passed after re-anchoring hand/foot reach planes to stable body-facing work areas and switching the reach-plane debug from rectangles to ellipses.
+- `ClimbEditor Win64 Development` build passed after splitting reach-plane tuning into per-limb settings (`LeftHand`, `RightHand`, `LeftFoot`, `RightFoot`) for independent plane offsets, extents, and search depth.
+- `ClimbEditor Win64 Development` build passed after unifying plane target semantics so the visible pink target, limb exploration target, and long-press near-point grab center all describe the same point on the reach plane.
+- `ClimbEditor Win64 Development` build passed after restoring the stricter exploration semantic: pink always drives the free steering pose, while yellow only indicates that a valid lock candidate exists near the current plane target.
+- `ClimbEditor Win64 Development` build passed after adding a presentation-side release blend-out in `UClimbingAnimInstance` so cleared limb targets can decay back toward their reference pose instead of dropping to no-target in a single frame.
+- `ClimbEditor Win64 Development` build passed after exposing a dedicated `bIsReleasing` animation flag on limb targets so Control Rig can distinguish release blend-out from both locked and free-exploration states.
+- `ClimbEditor Win64 Development` build passed after adding explicit per-limb release booleans on `UClimbingAnimInstance` / `ControlRigTargets` to avoid relying on nested struct-field refresh behavior inside Blueprint and Control Rig assets.
+- `ClimbEditor Win64 Development` build passed after cleaning the presentation-state bridge:
+  - removed the now-unused `bSnapToTarget` target-field path
+  - stopped depending on nested `FClimbingLimbAnimTarget::bIsReleasing` in Blueprint / Control Rig
+  - introduced explicit per-limb `EClimbingLimbPresentationState` values (`Inactive`, `Exploration`, `Locked`, `Releasing`) for animation-facing state consumption
+- `ClimbEditor Win64 Development` build passed after correcting presentation-state derivation so `Exploration` comes from the exploration target bridge and `Locked` comes from the locked contact bridge, rather than deriving all states from the locked target alone.
+- `ClimbEditor Win64 Development` build passed after exposing explicit per-limb presentation-state booleans on `UClimbingAnimInstance` / `FClimbingControlRigTargets` so Control Rig can consume stable `Exploration / Locked / Releasing` gates without relying on RigVM enum inputs.
+
+Manual checks:
+
+- Pending.
+
+Known risks:
+
+- Current presentation can still show abrupt exploration / lock transitions, visible distortion on large reaches, and obvious penetration artifacts.
+- Current probing can still miss obviously reachable chest-height hand holds because query origin/shape is not yet fully limb-plane-driven.
+- This phase must improve presentation quality without changing validated manual control semantics.

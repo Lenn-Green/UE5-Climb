@@ -245,6 +245,67 @@ Deferral note:
   - feet remain support contributors, not attachment owners
 - A later return to `P6` must include richer posture and hold-shape analysis instead of treating the current support solver as sufficient attachment authority by itself.
 
+## Stage P7 - Motion Smoothing And Pose Stability
+
+Goal: improve climbing presentation quality before introducing new gameplay semantics by smoothing transitions, reducing distortion, and avoiding obviously invalid poses.
+
+Scope:
+
+- Smooth exploration / lock / release target transitions
+- Reduce popping across support-layout changes
+- Reduce large-reach twisting, collapse, and corkscrew poses
+- Add practical presentation-side limits or blends that reduce visible wall penetration and self-intersection
+- Keep gameplay input semantics unchanged
+- Keep feet fully manual
+
+Out of scope:
+
+- New hold semantics
+- Attachment-authority redesign
+- Auto-stance, soft assist, or auto-lock
+- Final authored animation library
+
+Acceptance:
+
+- Exploration -> locked and locked -> released transitions are visibly smoother
+- Large target changes remain readable and avoid obvious impossible poses
+- Common validated workflows no longer produce frequent obvious wall penetration or severe self-intersection
+- Manual hand / foot control semantics remain unchanged
+
+Mapped gates: `G0`, `G4`, `G6`, `G7`
+
+Current implementation order:
+
+1. Identify target jump points in animation-facing bridge data.
+2. Add smoothing / blend rules for exploration, lock, and release transitions.
+3. Re-tune FBIK presentation parameters to reduce twist and collapse under large reaches.
+4. Replace point-or-ray-centric limb probing with limb-specific reach planes for hands and feet.
+5. Add practical pose constraints or presentation clamps to reduce visible penetration artifacts.
+6. Revalidate all existing manual climbing flows after smoothing changes.
+
+Current sub-stage focus:
+
+- `P7.A` Bridge-side smoothing and first-pass pose clamps:
+  - pelvis / target smoothing
+  - surface clearance offsets
+  - max reach clamps
+- `P7.B` Limb Reach Plane Query:
+  - define a hand reach plane instead of a pelvis-like probe origin + long aim line
+  - define a foot reach plane instead of a single foot origin ray
+  - keep each reach plane anchored to a stable body-facing work area rather than dragging the plane center with the active limb end effector
+  - drive probe target selection from those local wall-relative reach planes
+  - keep query ownership in `UClimbingHoldQueryComponent`
+  - keep input semantics unchanged
+
+`P7.B` intent:
+
+- Hands and feet should search within their own reachable wall-local work area.
+- The reach plane itself should be a stable work surface in front of the body, not a debug plane that follows the active limb tip.
+- The system should stop depending on a single low body-origin ray to find chest-height hand holds.
+- Query should center around a limb reach plane target first, then search locally for a candidate.
+
+Status: open. `P7 - Motion Smoothing And Pose Stability` is the active stage.
+
 ## Documentation Rule
 
 Before implementing a new stage from this plan:

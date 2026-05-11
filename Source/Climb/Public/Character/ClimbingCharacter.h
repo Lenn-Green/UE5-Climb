@@ -14,6 +14,30 @@ class UClimbingHoldQueryComponent;
 class UInputAction;
 class UInputMappingContext;
 
+USTRUCT(BlueprintType)
+struct FClimbingProbePlaneSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Probe Plane", meta=(ClampMin="0.0", Units="cm"))
+	float HorizontalRange = 50.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Probe Plane", meta=(ClampMin="0.0", Units="cm"))
+	float VerticalRange = 60.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Probe Plane", meta=(Units="cm"))
+	float ForwardOffset = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Probe Plane", meta=(Units="cm"))
+	float LateralOffset = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Probe Plane", meta=(Units="cm"))
+	float VerticalOffset = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Probe Plane", meta=(ClampMin="1.0", Units="cm"))
+	float SearchDepth = 35.0f;
+};
+
 UCLASS()
 class CLIMB_API AClimbingCharacter : public ACharacter
 {
@@ -195,26 +219,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
 	float CenterOfMassDebugSphereRadius = 8.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
-	float LimbProbeHorizontalRange = 120.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug|Reach Plane", meta=(ShowOnlyInnerProperties))
+	FClimbingProbePlaneSettings LeftHandProbeSettings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
-	float LimbProbeVerticalRange = 120.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug|Reach Plane", meta=(ShowOnlyInnerProperties))
+	FClimbingProbePlaneSettings RightHandProbeSettings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
-	float LimbProbeWallDepth = 35.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug|Reach Plane", meta=(ShowOnlyInnerProperties))
+	FClimbingProbePlaneSettings LeftFootProbeSettings;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
-	float FootProbeForwardOffset = 20.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
-	float FootProbeVerticalBias = 10.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="0.0", Units="cm"))
-	float HandProbeLateralOffset = 28.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
-	float HandProbeSearchDepth = 36.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug|Reach Plane", meta=(ShowOnlyInnerProperties))
+	FClimbingProbePlaneSettings RightFootProbeSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Debug", meta=(ClampMin="1.0", Units="cm"))
 	float HandExplorationReach = 75.0f;
@@ -267,8 +282,11 @@ private:
 	void UpdateClimbingDebugState(float DeltaSeconds);
 	void UpdateLimbProbeCandidate(const FClimbingAttachmentFrame& AttachmentFrame);
 	bool RefreshProbeCandidateForActiveLimb();
+	const FClimbingProbePlaneSettings& GetProbePlaneSettings(EClimbingLimb Limb) const;
+	FVector GetStableProbeBodyAnchor(EClimbingLimb Limb) const;
+	FVector GetActiveLimbProbeCenter(const FClimbingAttachmentFrame& AttachmentFrame) const;
 	FVector GetActiveLimbProbeOrigin(const FClimbingAttachmentFrame& AttachmentFrame) const;
-	FVector GetActiveLimbProbeTarget(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const;
+	FVector GetActiveLimbProbeTarget(const FClimbingAttachmentFrame& AttachmentFrame) const;
 	FClimbingAttachmentFrame BuildProbeFrame(const FClimbingAttachmentFrame& AttachmentFrame, const FVector& ProbeOrigin) const;
 	void DrawClimbingDebugState() const;
 	void SetClimbingState(EClimbingState NewState);
