@@ -148,6 +148,9 @@ public:
 	UFUNCTION(BlueprintPure, Category="Climbing|Animation")
 	FClimbingControlRigTargets GetControlRigTargets() const;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Climbing|Smoothing", meta=(ClampMin="0.01", UIMin="0.05", UIMax="0.60", Units="s", DisplayName="Release Target Blend Duration"))
+	float ReleaseTargetBlendDuration = 0.28f;
+
 protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")
 	TObjectPtr<AClimbingCharacter> ClimbingCharacter;
@@ -261,15 +264,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
 	float TargetRotationInterpSpeed = 14.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
-	float ReleaseTargetInterpSpeed = 14.0f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.01", Units="s"))
-	float ReleaseTargetBlendDuration = 0.28f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0", Units="cm"))
-	float ReleaseTargetCompletionDistance = 2.0f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Pose", meta=(ClampMin="0.0", Units="cm"))
 	float HandLockedSurfaceClearance = 6.0f;
