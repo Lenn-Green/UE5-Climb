@@ -79,6 +79,8 @@ Build a hardcore climbing simulation demo driven by C++ gameplay logic and expre
 
 ## Change Submission Rules
 
+- During implementation, keep relevant documentation current as behavior, stage status, tuning values, or verification results change.
+- Update the appropriate planning, checklist, tuning, or test-record document in the same change set when code or asset work changes documented behavior.
 - After every completed change, commit the current change set before reporting the work complete.
 - If there are uncommitted changes unrelated to the current task, do not include them in the current commit.
 - When unrelated uncommitted changes remain, explicitly tell the user and ask whether those remaining changes should also be committed.
