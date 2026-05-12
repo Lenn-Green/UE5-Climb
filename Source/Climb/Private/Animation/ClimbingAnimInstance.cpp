@@ -224,12 +224,13 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 			return DesiredTarget;
 		}
 
-		if (!CurrentTarget.bHasTarget && !bReleaseBlendActive)
+		if (!ReleaseStartTarget.bHasTarget && !CurrentTarget.bHasTarget && !bReleaseBlendActive)
 		{
 			return SmoothedTarget;
 		}
 
-		const FClimbingLimbAnimTarget ReferenceTarget = GetNeutralLimbPoseTarget(CurrentTarget.Limb);
+		const EClimbingLimb ReleaseLimb = ReleaseStartTarget.bHasTarget ? ReleaseStartTarget.Limb : CurrentTarget.Limb;
+		const FClimbingLimbAnimTarget ReferenceTarget = GetNeutralLimbPoseTarget(ReleaseLimb);
 		if (!ReferenceTarget.bHasTarget)
 		{
 			return SmoothedTarget;
@@ -245,8 +246,14 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 		// bridge and create a one-frame jump when the effector weight changes.
 		if (!bReleaseBlendActive)
 		{
-			ReleaseStartTarget = CurrentTarget;
-			ReleaseStartTarget.bHasTarget = true;
+			if (!ReleaseStartTarget.bHasTarget)
+			{
+				ReleaseStartTarget = CurrentTarget;
+			}
+			if (!ReleaseStartTarget.bHasTarget)
+			{
+				return DesiredTarget;
+			}
 			ReleaseStartTarget.bIsLocked = false;
 			bReleaseBlendActive = true;
 
@@ -256,7 +263,7 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 			return ReleaseStartTarget;
 		}
 
-		const FClimbingLimbAnimTarget ReleaseSource = CurrentTarget.bHasTarget ? CurrentTarget : ReleaseStartTarget;
+		const FClimbingLimbAnimTarget ReleaseSource = ReleaseStartTarget.bHasTarget ? ReleaseStartTarget : CurrentTarget;
 		SmoothedTarget = ReleaseSource;
 		SmoothedTarget.bHasTarget = true;
 		SmoothedTarget.bIsLocked = false;
@@ -274,10 +281,13 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 
 		if (FVector::DistSquared(SmoothedTarget.TargetLocation, ReferenceLocation) <= FMath::Square(ReleaseTargetCompletionDistance))
 		{
+			ReleaseStartTarget = FClimbingLimbAnimTarget();
+			ReleaseStartTarget.Limb = ReleaseLimb;
 			bReleaseBlendActive = false;
 			return DesiredTarget;
 		}
 
+		ReleaseStartTarget = SmoothedTarget;
 		return SmoothedTarget;
 	}
 
@@ -286,7 +296,12 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 	const float InterpSpeed = DesiredTarget.bIsLocked ? LockedTargetInterpSpeed : ExplorationTargetInterpSpeed;
 	if (DeltaSeconds <= 0.0f || InterpSpeed <= 0.0f)
 	{
-		return ApplyPresentationConstraints(SmoothedTarget, SkeletalMeshComponent);
+		SmoothedTarget = ApplyPresentationConstraints(SmoothedTarget, SkeletalMeshComponent);
+		if (DesiredTarget.bIsLocked && SmoothedTarget.bHasTarget)
+		{
+			ReleaseStartTarget = SmoothedTarget;
+		}
+		return SmoothedTarget;
 	}
 
 	FVector CurrentLocation = CurrentTarget.TargetLocation;
@@ -308,7 +323,12 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 	}
 
 	SmoothedTarget.TargetRotation = FMath::RInterpTo(CurrentRotation, DesiredTarget.TargetRotation, DeltaSeconds, TargetRotationInterpSpeed);
-	return ApplyPresentationConstraints(SmoothedTarget, SkeletalMeshComponent);
+	SmoothedTarget = ApplyPresentationConstraints(SmoothedTarget, SkeletalMeshComponent);
+	if (DesiredTarget.bIsLocked && SmoothedTarget.bHasTarget)
+	{
+		ReleaseStartTarget = SmoothedTarget;
+	}
+	return SmoothedTarget;
 }
 
 FClimbingLimbAnimTarget UClimbingAnimInstance::ApplyPresentationConstraints(
