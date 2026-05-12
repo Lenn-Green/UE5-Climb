@@ -97,13 +97,23 @@ void UClimbingAnimInstance::SnapshotClimbingData(float DeltaSeconds)
 	UpdateControlRigTargets();
 }
 
-FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent)
+FClimbingLimbAnimTarget UClimbingAnimInstance::MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent) const
 {
 	FClimbingLimbAnimTarget Target;
 	Target.Limb = LimbState.Limb;
 	Target.bHasTarget = LimbState.bHasValidContact;
 	Target.bIsLocked = LimbState.bIsLocked;
 	Target.LoadPercent = LimbState.LoadPercent;
+
+	if (!LimbState.bHasValidContact)
+	{
+		Target = GetNeutralLimbPoseTarget(LimbState.Limb);
+		Target.Limb = LimbState.Limb;
+		Target.bHasTarget = false;
+		Target.bIsLocked = false;
+		Target.LoadPercent = 0.0f;
+		return Target;
+	}
 
 	if (!SkeletalMeshComponent)
 	{

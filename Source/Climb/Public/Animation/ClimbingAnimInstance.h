@@ -295,7 +295,7 @@ protected:
 private:
 	void ResolveClimbingCharacter();
 	void SnapshotClimbingData(float DeltaSeconds);
-	static FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent);
+	FClimbingLimbAnimTarget MakeAnimTarget(const FLimbState& LimbState, const USkeletalMeshComponent* SkeletalMeshComponent) const;
 	FClimbingLimbAnimTarget MakeExplorationTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
 	static EClimbingLimbPresentationState DeterminePresentationState(
 		const FClimbingLimbAnimTarget& LockedTarget,
