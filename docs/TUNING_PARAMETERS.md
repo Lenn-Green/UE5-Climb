@@ -337,27 +337,43 @@
 - 大：朝向调整更快
 - 小：旋转更柔和
 
-### `ReleaseTargetBlendDuration`
+### `ReleaseTargetInterpSpeed`
 打开位置：
 - 打开 `ABP_ClimbingCharacter`
 - 点 `Class Defaults`
-- 搜索 `Release Target Blend Duration`
+- 搜索 `Release Target Interp Speed`
 - 分类：`Climbing | Smoothing`
 
 作用：
-- limb 释放后，从最后一个 locked target 回到 neutral/input pose target 的固定时长。
-- 当前 release 使用 smoothstep 曲线，不再使用速度逼近。
+- limb 释放后，从最后一个 locked target 回到 neutral/input pose target 的插值速度。
+- 当前 release 使用之前更顺滑的 `VInterpTo / RInterpTo` 速度型平滑。
+- hand target 的 inactive/default location 仍然保持在 neutral/input pose，不再回退到错误的 world-origin 转换值。
 
 现象：
-- 小：释放更利落，但可能偏硬
-- 大：释放更柔和，但可能显得拖沓或卡顿
+- 大：松开后更快回收，响应更利落，但可能偏硬
+- 小：松开后更柔和，但拖尾更长
 
 建议：
-- 常用范围：`0.18 ~ 0.35`
-- 当前默认：`0.28`
+- 常用范围：`8 ~ 18`
+- 当前默认：`14`
+
+### `ReleaseTargetCompletionDistance`
+打开位置：
+- 打开 `ABP_ClimbingCharacter`
+- 点 `Class Defaults`
+- 搜索 `Release Target Completion Distance`
+- 分类：`Climbing | Smoothing`
+
+作用：
+- release target 距离 neutral/input pose 多近时结束 release 过渡。
+
+建议：
+- 当前默认：`2cm`
+- 如果 release 末尾还有轻微顿挫，可以减小这个值。
+- 如果 release 保持过渡太久，可以增大这个值。
 
 注意：
-- `ReleaseTargetInterpSpeed` 和 `ReleaseTargetCompletionDistance` 已不再参与当前 release 路径。
+- `ReleaseTargetBlendDuration` 已不再参与当前 release 路径。
 - 如果旧参数还出现在 Blueprint 默认值里，关闭 Editor，重新构建 `ClimbEditor`，再打开项目。
 
 ---
