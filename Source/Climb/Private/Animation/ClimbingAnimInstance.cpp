@@ -2,6 +2,7 @@
 
 #include "Character/ClimbingCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
 void UClimbingAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -50,21 +51,7 @@ void UClimbingAnimInstance::SnapshotClimbingData(float DeltaSeconds)
 	CenterOfMassInput = ClimbingCharacter->GetClimbCenterOfMassInput();
 	LimbProbeInput = ClimbingCharacter->GetClimbLimbProbeInput();
 	const USkeletalMeshComponent* SkeletalMeshComponent = GetSkelMeshComponent();
-	const bool bHasActivePresentationTarget =
-		LeftHandTarget.bHasTarget ||
-		RightHandTarget.bHasTarget ||
-		LeftFootTarget.bHasTarget ||
-		RightFootTarget.bHasTarget ||
-		LeftHandExplorationTarget.bHasTarget ||
-		RightHandExplorationTarget.bHasTarget ||
-		LeftFootExplorationTarget.bHasTarget ||
-		RightFootExplorationTarget.bHasTarget ||
-		bLeftHandReleaseBlendActive ||
-		bRightHandReleaseBlendActive ||
-		bLeftFootReleaseBlendActive ||
-		bRightFootReleaseBlendActive;
-	const bool bRefreshNeutralPose = !bIsClimbing && !bHasActivePresentationTarget;
-	CacheNeutralPoseTargets(SkeletalMeshComponent, bRefreshNeutralPose);
+	CacheNeutralPoseTargets(SkeletalMeshComponent);
 	const FVector DesiredPelvisOffset = SkeletalMeshComponent
 		? SkeletalMeshComponent->GetComponentTransform().InverseTransformVectorNoScale(ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset)
 		: ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset;
@@ -372,34 +359,22 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::ApplyPresentationConstraints(
 
 FVector UClimbingAnimInstance::GetLimbReferenceLocation(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const
 {
-	if (!SkeletalMeshComponent)
+	const FClimbingLimbAnimTarget NeutralTarget = GetNeutralLimbPoseTarget(Limb);
+	if (NeutralTarget.bHasTarget)
 	{
-		return FVector::ZeroVector;
-	}
-
-	const FName ReferenceName =
-		(Limb == EClimbingLimb::LeftHand) ? FName(TEXT("hand_l")) :
-		(Limb == EClimbingLimb::RightHand) ? FName(TEXT("hand_r")) :
-		(Limb == EClimbingLimb::LeftFoot) ? FName(TEXT("foot_l")) :
-		(Limb == EClimbingLimb::RightFoot) ? FName(TEXT("foot_r")) :
-		NAME_None;
-
-	if (ReferenceName != NAME_None && SkeletalMeshComponent->DoesSocketExist(ReferenceName))
-	{
-		return SkeletalMeshComponent->GetSocketTransform(ReferenceName, RTS_Component).GetLocation();
+		return NeutralTarget.TargetLocation;
 	}
 
 	return FVector::ZeroVector;
 }
 
-FClimbingLimbAnimTarget UClimbingAnimInstance::GetCurrentLimbPoseTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const
+FClimbingLimbAnimTarget UClimbingAnimInstance::BuildReferencePoseTarget(EClimbingLimb Limb, const USkeletalMesh* SkeletalMesh) const
 {
 	FClimbingLimbAnimTarget Target;
 	Target.Limb = Limb;
-	Target.bHasTarget = SkeletalMeshComponent != nullptr;
 	Target.bIsLocked = false;
 
-	if (!SkeletalMeshComponent)
+	if (!SkeletalMesh)
 	{
 		return Target;
 	}
@@ -411,16 +386,23 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::GetCurrentLimbPoseTarget(EClimbin
 		(Limb == EClimbingLimb::RightFoot) ? FName(TEXT("foot_r")) :
 		NAME_None;
 
-	if (ReferenceName == NAME_None || !SkeletalMeshComponent->DoesSocketExist(ReferenceName))
+	const FReferenceSkeleton& ReferenceSkeleton = SkeletalMesh->GetRefSkeleton();
+	const int32 BoneIndex = ReferenceName != NAME_None ? ReferenceSkeleton.FindBoneIndex(ReferenceName) : INDEX_NONE;
+	if (BoneIndex == INDEX_NONE)
 	{
-		Target.bHasTarget = false;
 		return Target;
 	}
 
-	const FTransform SocketTransform = SkeletalMeshComponent->GetSocketTransform(ReferenceName, RTS_Component);
-	Target.TargetLocation = SocketTransform.GetLocation();
-	Target.TargetRotation = SocketTransform.Rotator();
-	Target.TargetNormal = SocketTransform.GetRotation().GetUpVector();
+	FTransform ComponentSpaceTransform = ReferenceSkeleton.GetRefBonePose()[BoneIndex];
+	for (int32 ParentIndex = ReferenceSkeleton.GetParentIndex(BoneIndex); ParentIndex != INDEX_NONE; ParentIndex = ReferenceSkeleton.GetParentIndex(ParentIndex))
+	{
+		ComponentSpaceTransform = ComponentSpaceTransform * ReferenceSkeleton.GetRefBonePose()[ParentIndex];
+	}
+
+	Target.bHasTarget = true;
+	Target.TargetLocation = ComponentSpaceTransform.GetLocation();
+	Target.TargetRotation = ComponentSpaceTransform.Rotator();
+	Target.TargetNormal = ComponentSpaceTransform.GetRotation().GetUpVector();
 	return Target;
 }
 
@@ -440,32 +422,24 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::GetNeutralLimbPoseTarget(EClimbin
 	}
 }
 
-void UClimbingAnimInstance::CacheNeutralPoseTargets(const USkeletalMeshComponent* SkeletalMeshComponent, bool bForceRefresh)
+void UClimbingAnimInstance::CacheNeutralPoseTargets(const USkeletalMeshComponent* SkeletalMeshComponent)
 {
 	if (!SkeletalMeshComponent)
 	{
 		return;
 	}
 
-	if (bForceRefresh || !LeftHandNeutralTarget.bHasTarget)
+	USkeletalMesh* SkeletalMesh = SkeletalMeshComponent->GetSkeletalMeshAsset();
+	if (!SkeletalMesh || CachedNeutralPoseMesh.Get() == SkeletalMesh)
 	{
-		LeftHandNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::LeftHand, SkeletalMeshComponent);
+		return;
 	}
 
-	if (bForceRefresh || !RightHandNeutralTarget.bHasTarget)
-	{
-		RightHandNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::RightHand, SkeletalMeshComponent);
-	}
-
-	if (bForceRefresh || !LeftFootNeutralTarget.bHasTarget)
-	{
-		LeftFootNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::LeftFoot, SkeletalMeshComponent);
-	}
-
-	if (bForceRefresh || !RightFootNeutralTarget.bHasTarget)
-	{
-		RightFootNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::RightFoot, SkeletalMeshComponent);
-	}
+	CachedNeutralPoseMesh = SkeletalMesh;
+	LeftHandNeutralTarget = BuildReferencePoseTarget(EClimbingLimb::LeftHand, SkeletalMesh);
+	RightHandNeutralTarget = BuildReferencePoseTarget(EClimbingLimb::RightHand, SkeletalMesh);
+	LeftFootNeutralTarget = BuildReferencePoseTarget(EClimbingLimb::LeftFoot, SkeletalMesh);
+	RightFootNeutralTarget = BuildReferencePoseTarget(EClimbingLimb::RightFoot, SkeletalMesh);
 }
 
 float UClimbingAnimInstance::GetSurfaceClearance(EClimbingLimb Limb, bool bIsLocked) const
@@ -535,6 +509,8 @@ void UClimbingAnimInstance::ResetClimbingData()
 	CenterOfMassInput = FVector2D::ZeroVector;
 	LimbProbeInput = FVector2D::ZeroVector;
 	PelvisOffset = FVector::ZeroVector;
+
+	CachedNeutralPoseMesh.Reset();
 
 	LeftHandTarget = FClimbingLimbAnimTarget();
 	LeftHandTarget.Limb = EClimbingLimb::LeftHand;

@@ -8,6 +8,7 @@
 
 class AClimbingCharacter;
 class USkeletalMeshComponent;
+class USkeletalMesh;
 
 UENUM(BlueprintType)
 enum class EClimbingLimbPresentationState : uint8
@@ -313,15 +314,17 @@ private:
 		const FClimbingLimbAnimTarget& Target,
 		const USkeletalMeshComponent* SkeletalMeshComponent) const;
 	FVector GetLimbReferenceLocation(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
-	FClimbingLimbAnimTarget GetCurrentLimbPoseTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
+	FClimbingLimbAnimTarget BuildReferencePoseTarget(EClimbingLimb Limb, const USkeletalMesh* SkeletalMesh) const;
 	FClimbingLimbAnimTarget GetNeutralLimbPoseTarget(EClimbingLimb Limb) const;
 	float GetSurfaceClearance(EClimbingLimb Limb, bool bIsLocked) const;
 	float GetMaxReach(EClimbingLimb Limb, bool bIsLocked) const;
 	void UpdateControlRigTargets();
 	void ResetClimbingData();
-	void CacheNeutralPoseTargets(const USkeletalMeshComponent* SkeletalMeshComponent, bool bForceRefresh);
+	void CacheNeutralPoseTargets(const USkeletalMeshComponent* SkeletalMeshComponent);
 
 private:
+	TWeakObjectPtr<USkeletalMesh> CachedNeutralPoseMesh;
+
 	FClimbingLimbAnimTarget LeftHandNeutralTarget;
 	FClimbingLimbAnimTarget RightHandNeutralTarget;
 	FClimbingLimbAnimTarget LeftFootNeutralTarget;
