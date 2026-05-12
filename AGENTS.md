@@ -77,6 +77,12 @@ Build a hardcore climbing simulation demo driven by C++ gameplay logic and expre
 - Hand movement pulls the pelvis closer to the wall.
 - Foot movement pushes the pelvis farther from the wall to create clearance.
 
+## Change Submission Rules
+
+- After every completed change, commit the current change set before reporting the work complete.
+- If there are uncommitted changes unrelated to the current task, do not include them in the current commit.
+- When unrelated uncommitted changes remain, explicitly tell the user and ask whether those remaining changes should also be committed.
+
 ## Gates
 
 Before marking work complete, check the relevant gate in `docs/GATES.md`. If a task touches multiple systems, all affected gates must pass. If a gate cannot be run yet, document the reason and the next concrete unblocker.
