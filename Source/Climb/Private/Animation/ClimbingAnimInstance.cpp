@@ -210,24 +210,27 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 		}
 
 		const FClimbingLimbAnimTarget ReferenceTarget = GetNeutralLimbPoseTarget(CurrentTarget.Limb);
+		if (!ReferenceTarget.bHasTarget)
+		{
+			return SmoothedTarget;
+		}
 		const FVector ReferenceLocation = ReferenceTarget.TargetLocation;
 		if (DeltaSeconds <= 0.0f || ReleaseTargetInterpSpeed <= 0.0f)
 		{
 			return SmoothedTarget;
 		}
 
-		// Cache the visual limb pose once at release start, then blend from that fixed origin back
-		// toward the reference pose. This avoids jumping to the previous logical target before release.
+		// Release starts from the previous animation-facing target, not from the current socket.
+		// Reading the socket after Control Rig has solved can feed the rigged pose back into the
+		// bridge and create a one-frame jump when the effector weight changes.
 		if (!bReleaseBlendActive)
 		{
-			ReleaseStartTarget = GetCurrentLimbPoseTarget(CurrentTarget.Limb, SkeletalMeshComponent);
-			if (!ReleaseStartTarget.bHasTarget)
-			{
-				ReleaseStartTarget = CurrentTarget;
-			}
+			ReleaseStartTarget = CurrentTarget;
+			ReleaseStartTarget.bHasTarget = true;
+			ReleaseStartTarget.bIsLocked = false;
 			bReleaseBlendActive = true;
 
-			// Hold the exact release-start pose for one frame. If we start interpolating immediately,
+			// Hold the exact bridge target for one frame. If we start interpolating immediately,
 			// the first release frame can still show a visible pop before the blend-out begins.
 			bOutIsReleasing = true;
 			return ReleaseStartTarget;
@@ -235,6 +238,8 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 
 		const FClimbingLimbAnimTarget ReleaseSource = CurrentTarget.bHasTarget ? CurrentTarget : ReleaseStartTarget;
 		SmoothedTarget = ReleaseSource;
+		SmoothedTarget.bHasTarget = true;
+		SmoothedTarget.bIsLocked = false;
 		bOutIsReleasing = true;
 		SmoothedTarget.TargetLocation = FMath::VInterpTo(
 			ReleaseSource.TargetLocation,
