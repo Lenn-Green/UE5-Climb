@@ -265,6 +265,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0"))
 	float ReleaseTargetInterpSpeed = 14.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.01", Units="s"))
+	float ReleaseTargetBlendDuration = 0.28f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Climbing|Smoothing", meta=(ClampMin="0.0", Units="cm"))
 	float ReleaseTargetCompletionDistance = 2.0f;
 
@@ -309,6 +312,7 @@ private:
 		bool bAllowReleaseBlend,
 		bool& bOutIsReleasing,
 		FClimbingLimbAnimTarget& ReleaseStartTarget,
+		float& ReleaseBlendElapsed,
 		bool& bReleaseBlendActive) const;
 	FClimbingLimbAnimTarget ApplyPresentationConstraints(
 		const FClimbingLimbAnimTarget& Target,
@@ -334,6 +338,11 @@ private:
 	FClimbingLimbAnimTarget RightHandReleaseStartTarget;
 	FClimbingLimbAnimTarget LeftFootReleaseStartTarget;
 	FClimbingLimbAnimTarget RightFootReleaseStartTarget;
+
+	float LeftHandReleaseBlendElapsed = 0.0f;
+	float RightHandReleaseBlendElapsed = 0.0f;
+	float LeftFootReleaseBlendElapsed = 0.0f;
+	float RightFootReleaseBlendElapsed = 0.0f;
 
 	bool bLeftHandReleaseBlendActive = false;
 	bool bRightHandReleaseBlendActive = false;
