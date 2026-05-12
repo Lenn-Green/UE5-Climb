@@ -305,6 +305,7 @@ private:
 		const FClimbingLimbAnimTarget& DesiredTarget,
 		float DeltaSeconds,
 		const USkeletalMeshComponent* SkeletalMeshComponent,
+		bool bAllowReleaseBlend,
 		bool& bOutIsReleasing,
 		FClimbingLimbAnimTarget& ReleaseStartTarget,
 		bool& bReleaseBlendActive) const;
