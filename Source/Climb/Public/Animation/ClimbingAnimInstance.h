@@ -305,13 +305,34 @@ private:
 		const FClimbingLimbAnimTarget& DesiredTarget,
 		float DeltaSeconds,
 		const USkeletalMeshComponent* SkeletalMeshComponent,
-		bool& bOutIsReleasing) const;
+		bool& bOutIsReleasing,
+		FClimbingLimbAnimTarget& ReleaseStartTarget,
+		bool& bReleaseBlendActive) const;
 	FClimbingLimbAnimTarget ApplyPresentationConstraints(
 		const FClimbingLimbAnimTarget& Target,
 		const USkeletalMeshComponent* SkeletalMeshComponent) const;
 	FVector GetLimbReferenceLocation(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
+	FClimbingLimbAnimTarget GetCurrentLimbPoseTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const;
+	FClimbingLimbAnimTarget GetNeutralLimbPoseTarget(EClimbingLimb Limb) const;
 	float GetSurfaceClearance(EClimbingLimb Limb, bool bIsLocked) const;
 	float GetMaxReach(EClimbingLimb Limb, bool bIsLocked) const;
 	void UpdateControlRigTargets();
 	void ResetClimbingData();
+	void CacheNeutralPoseTargets(const USkeletalMeshComponent* SkeletalMeshComponent, bool bForceRefresh);
+
+private:
+	FClimbingLimbAnimTarget LeftHandNeutralTarget;
+	FClimbingLimbAnimTarget RightHandNeutralTarget;
+	FClimbingLimbAnimTarget LeftFootNeutralTarget;
+	FClimbingLimbAnimTarget RightFootNeutralTarget;
+
+	FClimbingLimbAnimTarget LeftHandReleaseStartTarget;
+	FClimbingLimbAnimTarget RightHandReleaseStartTarget;
+	FClimbingLimbAnimTarget LeftFootReleaseStartTarget;
+	FClimbingLimbAnimTarget RightFootReleaseStartTarget;
+
+	bool bLeftHandReleaseBlendActive = false;
+	bool bRightHandReleaseBlendActive = false;
+	bool bLeftFootReleaseBlendActive = false;
+	bool bRightFootReleaseBlendActive = false;
 };

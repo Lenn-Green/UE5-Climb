@@ -2,7 +2,6 @@
 
 #include "Character/ClimbingCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
-
 void UClimbingAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -51,6 +50,8 @@ void UClimbingAnimInstance::SnapshotClimbingData(float DeltaSeconds)
 	CenterOfMassInput = ClimbingCharacter->GetClimbCenterOfMassInput();
 	LimbProbeInput = ClimbingCharacter->GetClimbLimbProbeInput();
 	const USkeletalMeshComponent* SkeletalMeshComponent = GetSkelMeshComponent();
+	const bool bRefreshNeutralPose = !bIsClimbing;
+	CacheNeutralPoseTargets(SkeletalMeshComponent, bRefreshNeutralPose);
 	const FVector DesiredPelvisOffset = SkeletalMeshComponent
 		? SkeletalMeshComponent->GetComponentTransform().InverseTransformVectorNoScale(ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset)
 		: ClimbingCharacter->GetClimbingDebugState().CenterOfMassTargetOffset;
@@ -63,14 +64,16 @@ void UClimbingAnimInstance::SnapshotClimbingData(float DeltaSeconds)
 	bool bLeftFootReleasing = false;
 	bool bRightFootReleasing = false;
 	bool bIgnoredRelease = false;
-	LeftHandTarget = SmoothLimbTarget(LeftHandTarget, MakeAnimTarget(ClimbingCharacter->GetLeftHandState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bLeftHandReleasing);
-	RightHandTarget = SmoothLimbTarget(RightHandTarget, MakeAnimTarget(ClimbingCharacter->GetRightHandState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bRightHandReleasing);
-	LeftHandExplorationTarget = SmoothLimbTarget(LeftHandExplorationTarget, MakeExplorationTarget(EClimbingLimb::LeftHand, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease);
-	RightHandExplorationTarget = SmoothLimbTarget(RightHandExplorationTarget, MakeExplorationTarget(EClimbingLimb::RightHand, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease);
-	LeftFootTarget = SmoothLimbTarget(LeftFootTarget, MakeAnimTarget(ClimbingCharacter->GetLeftFootState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bLeftFootReleasing);
-	RightFootTarget = SmoothLimbTarget(RightFootTarget, MakeAnimTarget(ClimbingCharacter->GetRightFootState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bRightFootReleasing);
-	LeftFootExplorationTarget = SmoothLimbTarget(LeftFootExplorationTarget, MakeExplorationTarget(EClimbingLimb::LeftFoot, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease);
-	RightFootExplorationTarget = SmoothLimbTarget(RightFootExplorationTarget, MakeExplorationTarget(EClimbingLimb::RightFoot, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease);
+	bool bDummyReleaseBlendActive = false;
+	FClimbingLimbAnimTarget DummyReleaseStartTarget;
+	LeftHandTarget = SmoothLimbTarget(LeftHandTarget, MakeAnimTarget(ClimbingCharacter->GetLeftHandState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bLeftHandReleasing, LeftHandReleaseStartTarget, bLeftHandReleaseBlendActive);
+	RightHandTarget = SmoothLimbTarget(RightHandTarget, MakeAnimTarget(ClimbingCharacter->GetRightHandState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bRightHandReleasing, RightHandReleaseStartTarget, bRightHandReleaseBlendActive);
+	LeftHandExplorationTarget = SmoothLimbTarget(LeftHandExplorationTarget, MakeExplorationTarget(EClimbingLimb::LeftHand, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease, DummyReleaseStartTarget, bDummyReleaseBlendActive);
+	RightHandExplorationTarget = SmoothLimbTarget(RightHandExplorationTarget, MakeExplorationTarget(EClimbingLimb::RightHand, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease, DummyReleaseStartTarget, bDummyReleaseBlendActive);
+	LeftFootTarget = SmoothLimbTarget(LeftFootTarget, MakeAnimTarget(ClimbingCharacter->GetLeftFootState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bLeftFootReleasing, LeftFootReleaseStartTarget, bLeftFootReleaseBlendActive);
+	RightFootTarget = SmoothLimbTarget(RightFootTarget, MakeAnimTarget(ClimbingCharacter->GetRightFootState(), SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bRightFootReleasing, RightFootReleaseStartTarget, bRightFootReleaseBlendActive);
+	LeftFootExplorationTarget = SmoothLimbTarget(LeftFootExplorationTarget, MakeExplorationTarget(EClimbingLimb::LeftFoot, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease, DummyReleaseStartTarget, bDummyReleaseBlendActive);
+	RightFootExplorationTarget = SmoothLimbTarget(RightFootExplorationTarget, MakeExplorationTarget(EClimbingLimb::RightFoot, SkeletalMeshComponent), DeltaSeconds, SkeletalMeshComponent, bIgnoredRelease, DummyReleaseStartTarget, bDummyReleaseBlendActive);
 	LeftHandPresentationState = DeterminePresentationState(LeftHandTarget, LeftHandExplorationTarget, bLeftHandReleasing);
 	RightHandPresentationState = DeterminePresentationState(RightHandTarget, RightHandExplorationTarget, bRightHandReleasing);
 	LeftFootPresentationState = DeterminePresentationState(LeftFootTarget, LeftFootExplorationTarget, bLeftFootReleasing);
@@ -192,41 +195,68 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 	const FClimbingLimbAnimTarget& DesiredTarget,
 	float DeltaSeconds,
 	const USkeletalMeshComponent* SkeletalMeshComponent,
-	bool& bOutIsReleasing) const
+	bool& bOutIsReleasing,
+	FClimbingLimbAnimTarget& ReleaseStartTarget,
+	bool& bReleaseBlendActive) const
 {
 	bOutIsReleasing = false;
 	FClimbingLimbAnimTarget SmoothedTarget = DesiredTarget;
 
 	if (!DesiredTarget.bHasTarget)
 	{
-		if (!CurrentTarget.bHasTarget)
+		if (!CurrentTarget.bHasTarget && !bReleaseBlendActive)
 		{
 			return SmoothedTarget;
 		}
 
-		const FVector ReferenceLocation = GetLimbReferenceLocation(CurrentTarget.Limb, SkeletalMeshComponent);
+		const FClimbingLimbAnimTarget ReferenceTarget = GetNeutralLimbPoseTarget(CurrentTarget.Limb);
+		const FVector ReferenceLocation = ReferenceTarget.TargetLocation;
 		if (DeltaSeconds <= 0.0f || ReleaseTargetInterpSpeed <= 0.0f)
 		{
 			return SmoothedTarget;
 		}
 
-		// When gameplay clears a limb immediately on release, keep a short presentation-side blend-out
-		// so the effector can travel back toward its reference pose instead of snapping off the hold.
-		SmoothedTarget = CurrentTarget;
+		// Cache the visual limb pose once at release start, then blend from that fixed origin back
+		// toward the reference pose. This avoids jumping to the previous logical target before release.
+		if (!bReleaseBlendActive)
+		{
+			ReleaseStartTarget = GetCurrentLimbPoseTarget(CurrentTarget.Limb, SkeletalMeshComponent);
+			if (!ReleaseStartTarget.bHasTarget)
+			{
+				ReleaseStartTarget = CurrentTarget;
+			}
+			bReleaseBlendActive = true;
+
+			// Hold the exact release-start pose for one frame. If we start interpolating immediately,
+			// the first release frame can still show a visible pop before the blend-out begins.
+			bOutIsReleasing = true;
+			return ReleaseStartTarget;
+		}
+
+		const FClimbingLimbAnimTarget ReleaseSource = CurrentTarget.bHasTarget ? CurrentTarget : ReleaseStartTarget;
+		SmoothedTarget = ReleaseSource;
 		bOutIsReleasing = true;
 		SmoothedTarget.TargetLocation = FMath::VInterpTo(
-			CurrentTarget.TargetLocation,
+			ReleaseSource.TargetLocation,
 			ReferenceLocation,
+			DeltaSeconds,
+			ReleaseTargetInterpSpeed);
+		SmoothedTarget.TargetRotation = FMath::RInterpTo(
+			ReleaseSource.TargetRotation,
+			ReferenceTarget.TargetRotation,
 			DeltaSeconds,
 			ReleaseTargetInterpSpeed);
 
 		if (FVector::DistSquared(SmoothedTarget.TargetLocation, ReferenceLocation) <= FMath::Square(ReleaseTargetCompletionDistance))
 		{
+			bReleaseBlendActive = false;
 			return DesiredTarget;
 		}
 
 		return SmoothedTarget;
 	}
+
+	bReleaseBlendActive = false;
 
 	const float InterpSpeed = DesiredTarget.bIsLocked ? LockedTargetInterpSpeed : ExplorationTargetInterpSpeed;
 	if (DeltaSeconds <= 0.0f || InterpSpeed <= 0.0f)
@@ -317,6 +347,82 @@ FVector UClimbingAnimInstance::GetLimbReferenceLocation(EClimbingLimb Limb, cons
 	return FVector::ZeroVector;
 }
 
+FClimbingLimbAnimTarget UClimbingAnimInstance::GetCurrentLimbPoseTarget(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const
+{
+	FClimbingLimbAnimTarget Target;
+	Target.Limb = Limb;
+	Target.bHasTarget = SkeletalMeshComponent != nullptr;
+	Target.bIsLocked = false;
+
+	if (!SkeletalMeshComponent)
+	{
+		return Target;
+	}
+
+	const FName ReferenceName =
+		(Limb == EClimbingLimb::LeftHand) ? FName(TEXT("hand_l")) :
+		(Limb == EClimbingLimb::RightHand) ? FName(TEXT("hand_r")) :
+		(Limb == EClimbingLimb::LeftFoot) ? FName(TEXT("foot_l")) :
+		(Limb == EClimbingLimb::RightFoot) ? FName(TEXT("foot_r")) :
+		NAME_None;
+
+	if (ReferenceName == NAME_None || !SkeletalMeshComponent->DoesSocketExist(ReferenceName))
+	{
+		Target.bHasTarget = false;
+		return Target;
+	}
+
+	const FTransform SocketTransform = SkeletalMeshComponent->GetSocketTransform(ReferenceName, RTS_Component);
+	Target.TargetLocation = SocketTransform.GetLocation();
+	Target.TargetRotation = SocketTransform.Rotator();
+	Target.TargetNormal = SocketTransform.GetRotation().GetUpVector();
+	return Target;
+}
+
+FClimbingLimbAnimTarget UClimbingAnimInstance::GetNeutralLimbPoseTarget(EClimbingLimb Limb) const
+{
+	switch (Limb)
+	{
+	case EClimbingLimb::LeftHand:
+		return LeftHandNeutralTarget;
+	case EClimbingLimb::RightHand:
+		return RightHandNeutralTarget;
+	case EClimbingLimb::LeftFoot:
+		return LeftFootNeutralTarget;
+	case EClimbingLimb::RightFoot:
+	default:
+		return RightFootNeutralTarget;
+	}
+}
+
+void UClimbingAnimInstance::CacheNeutralPoseTargets(const USkeletalMeshComponent* SkeletalMeshComponent, bool bForceRefresh)
+{
+	if (!SkeletalMeshComponent)
+	{
+		return;
+	}
+
+	if (bForceRefresh || !LeftHandNeutralTarget.bHasTarget)
+	{
+		LeftHandNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::LeftHand, SkeletalMeshComponent);
+	}
+
+	if (bForceRefresh || !RightHandNeutralTarget.bHasTarget)
+	{
+		RightHandNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::RightHand, SkeletalMeshComponent);
+	}
+
+	if (bForceRefresh || !LeftFootNeutralTarget.bHasTarget)
+	{
+		LeftFootNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::LeftFoot, SkeletalMeshComponent);
+	}
+
+	if (bForceRefresh || !RightFootNeutralTarget.bHasTarget)
+	{
+		RightFootNeutralTarget = GetCurrentLimbPoseTarget(EClimbingLimb::RightFoot, SkeletalMeshComponent);
+	}
+}
+
 float UClimbingAnimInstance::GetSurfaceClearance(EClimbingLimb Limb, bool bIsLocked) const
 {
 	switch (Limb)
@@ -387,9 +493,13 @@ void UClimbingAnimInstance::ResetClimbingData()
 
 	LeftHandTarget = FClimbingLimbAnimTarget();
 	LeftHandTarget.Limb = EClimbingLimb::LeftHand;
+	LeftHandNeutralTarget = FClimbingLimbAnimTarget();
+	LeftHandNeutralTarget.Limb = EClimbingLimb::LeftHand;
 
 	RightHandTarget = FClimbingLimbAnimTarget();
 	RightHandTarget.Limb = EClimbingLimb::RightHand;
+	RightHandNeutralTarget = FClimbingLimbAnimTarget();
+	RightHandNeutralTarget.Limb = EClimbingLimb::RightHand;
 
 	LeftHandExplorationTarget = FClimbingLimbAnimTarget();
 	LeftHandExplorationTarget.Limb = EClimbingLimb::LeftHand;
@@ -405,12 +515,20 @@ void UClimbingAnimInstance::ResetClimbingData()
 	bRightHandIsExploration = false;
 	bRightHandIsLocked = false;
 	bRightHandIsReleasing = false;
+	LeftHandReleaseStartTarget = FClimbingLimbAnimTarget();
+	RightHandReleaseStartTarget = FClimbingLimbAnimTarget();
+	bLeftHandReleaseBlendActive = false;
+	bRightHandReleaseBlendActive = false;
 
 	LeftFootTarget = FClimbingLimbAnimTarget();
 	LeftFootTarget.Limb = EClimbingLimb::LeftFoot;
+	LeftFootNeutralTarget = FClimbingLimbAnimTarget();
+	LeftFootNeutralTarget.Limb = EClimbingLimb::LeftFoot;
 
 	RightFootTarget = FClimbingLimbAnimTarget();
 	RightFootTarget.Limb = EClimbingLimb::RightFoot;
+	RightFootNeutralTarget = FClimbingLimbAnimTarget();
+	RightFootNeutralTarget.Limb = EClimbingLimb::RightFoot;
 
 	LeftFootExplorationTarget = FClimbingLimbAnimTarget();
 	LeftFootExplorationTarget.Limb = EClimbingLimb::LeftFoot;
@@ -426,6 +544,10 @@ void UClimbingAnimInstance::ResetClimbingData()
 	bRightFootIsExploration = false;
 	bRightFootIsLocked = false;
 	bRightFootIsReleasing = false;
+	LeftFootReleaseStartTarget = FClimbingLimbAnimTarget();
+	RightFootReleaseStartTarget = FClimbingLimbAnimTarget();
+	bLeftFootReleaseBlendActive = false;
+	bRightFootReleaseBlendActive = false;
 
 	UpdateControlRigTargets();
 }
