@@ -296,6 +296,7 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::SmoothLimbTarget(
 			return CompletedTarget;
 		}
 
+		ReleaseStartTarget = SmoothedTarget;
 		return SmoothedTarget;
 	}
 
@@ -380,10 +381,21 @@ FClimbingLimbAnimTarget UClimbingAnimInstance::ApplyPresentationConstraints(
 
 FVector UClimbingAnimInstance::GetLimbReferenceLocation(EClimbingLimb Limb, const USkeletalMeshComponent* SkeletalMeshComponent) const
 {
-	const FClimbingLimbAnimTarget NeutralTarget = GetNeutralLimbPoseTarget(Limb);
-	if (NeutralTarget.bHasTarget)
+	if (!SkeletalMeshComponent)
 	{
-		return NeutralTarget.TargetLocation;
+		return FVector::ZeroVector;
+	}
+
+	const FName ReferenceName =
+		(Limb == EClimbingLimb::LeftHand) ? FName(TEXT("hand_l")) :
+		(Limb == EClimbingLimb::RightHand) ? FName(TEXT("hand_r")) :
+		(Limb == EClimbingLimb::LeftFoot) ? FName(TEXT("foot_l")) :
+		(Limb == EClimbingLimb::RightFoot) ? FName(TEXT("foot_r")) :
+		NAME_None;
+
+	if (ReferenceName != NAME_None && SkeletalMeshComponent->DoesSocketExist(ReferenceName))
+	{
+		return SkeletalMeshComponent->GetSocketTransform(ReferenceName, RTS_Component).GetLocation();
 	}
 
 	return FVector::ZeroVector;

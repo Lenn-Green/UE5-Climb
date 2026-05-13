@@ -348,6 +348,7 @@
 - limb 释放后，从最后一个 locked target 回到 neutral/input pose target 的插值速度。
 - 当前 release 使用之前更顺滑的 `VInterpTo / RInterpTo` 速度型平滑。
 - hand target 的 inactive/default location 仍然保持在 neutral/input pose，不再回退到错误的 world-origin 转换值。
+- 抓取和锁定约束的平滑参考点仍读取当前 limb socket pose，用来保留旧版抓取/释放的流畅感；这个参考点不改变 inactive/default hand target。
 
 现象：
 - 大：松开后更快回收，响应更利落，但可能偏硬
