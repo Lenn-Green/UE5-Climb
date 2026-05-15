@@ -152,7 +152,7 @@ public:
 	float ReleaseTargetInterpSpeed = 14.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Climbing|Smoothing", meta=(ClampMin="0.0", UIMin="0.5", UIMax="10.0", Units="cm", DisplayName="Release Target Completion Distance"))
-	float ReleaseTargetCompletionDistance = 2.0f;
+	float ReleaseTargetCompletionDistance = 0.5f;
 
 protected:
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Climbing|Animation")

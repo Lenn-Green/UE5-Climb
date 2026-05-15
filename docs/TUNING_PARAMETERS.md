@@ -369,7 +369,7 @@
 - release target 距离 neutral/input pose 多近时结束 release 过渡。
 
 建议：
-- 当前默认：`2cm`
+- 当前默认：`0.5cm`
 - 如果 release 末尾还有轻微顿挫，可以减小这个值。
 - 如果 release 保持过渡太久，可以增大这个值。
 
